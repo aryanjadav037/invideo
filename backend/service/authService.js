@@ -4,12 +4,13 @@ class AuthService {
         this.tokenService = tokenService;
     }
 
-    async register(email, password) {
-        const existingUser = await this.userModel.findByEmail(email);
+    async register(Username, Full_Name, email, password) {
+        const existingUser = await this.userModel.findOne({ email });
+
         if (existingUser) {
             throw new Error('User already exists');
         }
-        const newUser = await this.userModel.create({ email, password });
+        const newUser = await this.userModel.create({ Username, Full_Name, email, password });
         return newUser;
     }
 

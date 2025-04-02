@@ -1,11 +1,12 @@
 import express from 'express';
-import LoginController from './LoginController.js';
-import AuthService from './AuthService.js';
-import TokenService from './TokenService.js';
-import UserModel from './UserModel.js';
+import SignupController from '../controllers/signup.js';
+import LoginController from '../controllers/login.js';
+import AuthService from '../service/authService.js';
+import TokenService from '../service/tokenService.js';
+import UserModel from '../models/userModel.js';
 
 const router = express.Router();
-const tokenService = new TokenService('your_secret_key', '1h');
+const tokenService = new TokenService(process.env.SECRET_KEY, '1h');
 const authService = new AuthService(UserModel, tokenService);
 const signupController = new SignupController(authService);
 const loginController = new LoginController(authService);
