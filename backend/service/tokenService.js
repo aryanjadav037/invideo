@@ -7,7 +7,7 @@ class TokenService {
     }
 
     generateToken(user) {
-        return jwt.sign({ id: user.id, email: user.email }, this.secret, { expiresIn: this.expiresIn });
+        return jwt.sign({ id: user._id, email: user.email }, this.secret, { expiresIn: this.expiresIn });
     }
 
     verifyToken(token) {
@@ -18,8 +18,7 @@ class TokenService {
         }
     }
 
-    invalidateToken(user) {
-        // Implementation depends on how token invalidation is handled (e.g., blacklist)
+    invalidateToken() {
         return true;
     }
 }

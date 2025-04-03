@@ -1,34 +1,28 @@
-import mongoose from "mongoose";
-import { z } from "zod";
-
-const userValidationSchema = z.object({
-  Username: z.string().min(3, "Username must be at least 3 characters long"),
-  Full_Name: z.string().min(3, "Full Name must be at least 3 characters long"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
-  role: z.enum(['owner', 'user']).default('user'),
-});
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
 const UserSchema = new mongoose.Schema({
-  Username: { type: String, required: true, unique: true },
-  Full_Name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, enum: ['owner', 'user'], default: 'user' },
+    Username: { type: String, required: true, unique: true },
+    Full_Name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    dob: { type: Date, required: false },
+    role: { type: String, enum: ['owner', 'user'], default: 'user' },
 }, {
-  timestamps: true 
+    timestamps: true,
 });
 
-UserSchema.pre("save", function (next) {
-  const validationResult = userValidationSchema.safeParse(this.toObject());
-  if (!validationResult.success) {
-    const errorMessages = validationResult.error.errors
-      .map((err) => err.message)
-      .join(", ");
-    return next(new Error(errorMessages));
-  }
-  next();
+// Hash the password before saving
+UserSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return next();
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
 });
 
-const User = mongoose.model("User", UserSchema);
+// Password comparison
+UserSchema.methods.verifyPassword = async function (inputPassword) {
+    return await bcrypt.compare(inputPassword, this.password);
+};
+
+const User = mongoose.model('User', UserSchema);
 export default User;
