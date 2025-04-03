@@ -17,11 +17,6 @@ class TokenService {
             throw new Error('Invalid or expired token');
         }
     }
-
-    invalidateToken(user) {
-        // Implementation depends on how token invalidation is handled (e.g., blacklist)
-        return true;
-    }
 }
 
 export default TokenService;
