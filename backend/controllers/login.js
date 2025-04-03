@@ -9,8 +9,8 @@ class LoginController {
             const token = await this.authService.authenticate(email, password);
 
             res.cookie("auth_token", token, {
-                httpOnly: true, // Prevents access via JavaScript (more secure)
-                secure: process.env.NODE_ENV === "production", // Only send on HTTPS in production
+                httpOnly: true, 
+                secure: process.env.NODE_ENV === "production", 
                 maxAge: 3600000, // 1 hour
             });
 
