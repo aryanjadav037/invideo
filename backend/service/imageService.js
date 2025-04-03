@@ -59,7 +59,20 @@ const saveImageToDatabase = async (userId, prompt, imageUrl) => {
   }
 };
 
+const getUserImages = async (userId) => {
+  try {
+      // Fetch all images by userId
+      const images = await ImageModel.find({ user: userId }).sort({ createdAt: -1 });
+
+      return images;
+  } catch (error) {
+      console.error("Error fetching user images:", error.message);
+      throw new Error("Failed to fetch images");
+  }
+};
+
 export default {
   generateImage,
   saveImageToDatabase,
+  getUserImages,
 };

@@ -33,15 +33,24 @@ class ImageController {
 
   async fetchUserImages(req, res) {
     try {
-      const userId = req.user.id;
-      const images = await ImageModel.find({ user: userId });
+        const userId = req.user.id;
 
-      res.status(200).json({ success: true, images });
+        // Fetch images from DB
+        const images = await ImageService.getUserImages(userId);
+
+        res.status(200).json({
+            success: true,
+            images: images.map(image => ({
+                prompt: image.prompt,
+                imageUrl: image.imageUrl,
+                createdAt: image.createdAt
+            }))
+        });
     } catch (error) {
-      console.error("❌ Error fetching images:", error.message);
-      res.status(500).json({ success: false, message: "Failed to retrieve images" });
+        console.error("Error fetching images:", error.message);
+        res.status(500).json({ success: false, message: "Failed to retrieve images" });
     }
-  }
+}
 }
 
 export default new ImageController();
