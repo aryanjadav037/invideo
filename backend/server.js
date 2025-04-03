@@ -2,8 +2,9 @@ import express from 'express';
 import connectDB from './config/db.js';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
-import ImageRoutes from './routes/imageRoutes.js';
 import errorHandler from './middlewares/errorHandler.js';
+
+import ImageRoutes from './routes/imageRoutes.js';
 import CookieParser from 'cookie-parser';
 dotenv.config();
 const app = express();
