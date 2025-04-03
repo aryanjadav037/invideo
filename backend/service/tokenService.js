@@ -7,7 +7,7 @@ class TokenService {
     }
 
     generateToken(user) {
-        return jwt.sign({ id: user.id, email: user.email }, this.secret, { expiresIn: this.expiresIn });
+        return jwt.sign({ id: user._id, email: user.email }, this.secret, { expiresIn: this.expiresIn });
     }
 
     verifyToken(token) {
@@ -16,6 +16,10 @@ class TokenService {
         } catch (error) {
             throw new Error('Invalid or expired token');
         }
+    }
+
+    invalidateToken() {
+        return true;
     }
 }
 

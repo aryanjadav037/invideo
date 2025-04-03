@@ -3,13 +3,13 @@ class SignupController {
         this.authService = authService;
     }
 
-    async signup(req, res) {
+    async signup(req, res, next) {
         try {
-            const { Username, Full_Name, email, password } = req.body;
-            const user = await this.authService.register(Username, Full_Name, email, password);
+            const { Username, Full_Name, email, password, dob, role } = req.body;
+            const user = await this.authService.register(Username, Full_Name, email, password, dob, role);
             res.status(201).json({ success: true, user });
         } catch (error) {
-            res.status(400).json({ success: false, message: error.message });
+            next(error);
         }
     }
 }
