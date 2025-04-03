@@ -1,7 +1,6 @@
 
 import ImageService from "../service/imageService.js";
-import { writeFileSync, mkdirSync } from "fs";
-import path from "path";
+import uploadImageToCloudinary from "../service/uploadService.js";
 
 class ImageController {
   async createImage(req, res) {
@@ -21,22 +20,11 @@ class ImageController {
 
       const base64Data = response.base64Data;
 
-      // Ensure images directory exists
-      const imagesDir = path.join(process.cwd(), "images");
-      mkdirSync(imagesDir, { recursive: true });
+      const { url, public_id} = await uploadImageToCloudinary(base64Data);
 
-      const imageName = `generated_image_${Date.now()}.png`;
-      const imagePath = path.join(imagesDir, imageName);
+      await ImageService.saveImageToDatabase(userId, prompt, url);
 
-      // Save image as file
-      writeFileSync(imagePath, base64Data, { encoding: "base64" });
-    //   console.log("✅ Image saved locally:", imagePath);
-
-      const imageUrl = `${process.env.SERVER_URL}/images/${imageName}`;
-
-      await ImageService.saveImageToDatabase(userId, prompt, imageUrl);
-
-      res.status(200).json({ success: true, imageUrl });
+      res.status(200).json({ success: true, data: url });
     } catch (error) {
       console.error("❌ Error in createImage:", error.message);
       res.status(500).json({ success: false, message: "Internal Server Error" });
