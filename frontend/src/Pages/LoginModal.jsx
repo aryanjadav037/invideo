@@ -1,38 +1,38 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const LoginModal = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     // Clear error when user types
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "Email is invalid";
     }
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -47,14 +47,18 @@ const LoginModal = () => {
       // const response = await loginUser(formData);
       // console.log('Login successful:', response);
       // navigate('/dashboard'); // Redirect after successful login
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Login form data:', formData);
-      navigate('/'); // Redirect to home after login
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      console.log("Login form data:", formData);
+      // navigate('/'); // Redirect to home after login
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const location = useLocation();
+      navigate(location.state?.from || "/workspace", { replace: true });
+
     } catch (error) {
-      console.error('Login failed:', error);
-      setErrors({ server: 'Invalid email or password' });
+      console.error("Login failed:", error);
+      setErrors({ server: "Invalid email or password" });
     } finally {
       setIsLoading(false);
     }
@@ -73,10 +77,12 @@ const LoginModal = () => {
         </button>
 
         {/* Title */}
-        <h2 className="text-2xl font-bold text-center mb-4">Login to your account</h2>
+        <h2 className="text-2xl font-bold text-center mb-4">
+          Login to your account
+        </h2>
 
         {/* Google Login */}
-        <button 
+        <button
           type="button"
           className="flex items-center justify-center w-full py-2 border rounded text-sm font-medium hover:bg-gray-100 mb-3"
           disabled={isLoading}
@@ -92,7 +98,7 @@ const LoginModal = () => {
         {/* Divider */}
         <div className="flex items-center my-4">
           <div className="flex-grow border-t"></div>
-          <span className="mx-3 text-xs text-gray-400">OR</span>
+          <span className="mx-3 text-xs ">OR</span>
           <div className="flex-grow border-t"></div>
         </div>
 
@@ -106,10 +112,14 @@ const LoginModal = () => {
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full px-4 py-2 border rounded text-sm focus:outline-none focus:ring ${errors.email ? 'border-red-500' : ''}`}
+              className={`w-full px-4 py-2 border rounded text-sm focus:outline-none focus:ring ${
+                errors.email ? "border-red-500" : ""
+              }`}
               disabled={isLoading}
             />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+            )}
           </div>
 
           {/* Password Input */}
@@ -120,10 +130,14 @@ const LoginModal = () => {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className={`w-full px-4 py-2 border rounded text-sm focus:outline-none focus:ring ${errors.password ? 'border-red-500' : ''}`}
+              className={`w-full px-4 py-2 border rounded text-sm focus:outline-none focus:ring ${
+                errors.password ? "border-red-500" : ""
+              }`}
               disabled={isLoading}
             />
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+            )}
           </div>
 
           {/* Server Error */}
@@ -134,20 +148,22 @@ const LoginModal = () => {
           )}
 
           {/* Continue Button */}
-          <button 
+          <button
             type="submit"
-            className={`w-full bg-blue-500 text-white font-medium py-2 rounded hover:bg-blue-600 transition ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`w-full bg-blue-500 text-white font-medium py-2 rounded hover:bg-blue-600 transition ${
+              isLoading ? "opacity-70 cursor-not-allowed" : ""
+            }`}
             disabled={isLoading}
           >
-            {isLoading ? 'Logging in...' : 'Continue'}
+            {isLoading ? "Logging in..." : "Continue"}
           </button>
         </form>
 
         {/* Footer Links */}
-        <div className="text-center mt-4 text-sm text-gray-500">
+        <div className="text-center mt-4 text-sm text-gray-800">
           Don't have an account?{" "}
-          <Link 
-            to="/signup" 
+          <Link
+            to="/signup"
             className="text-blue-500 hover:underline"
             onClick={(e) => isLoading && e.preventDefault()}
           >
@@ -155,11 +171,11 @@ const LoginModal = () => {
           </Link>
         </div>
 
-        <div className="text-center mt-2 text-xs text-gray-400">
+        <div className="text-center mt-2 text-xs">
           Try{" "}
-          <a 
-            href="/ai" 
-            className="text-gray-500 underline hover:text-black"
+          <a
+            href="/ai"
+            className="underline hover:text-black"
             onClick={(e) => isLoading && e.preventDefault()}
           >
             invideo AI
