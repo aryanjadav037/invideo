@@ -8,8 +8,8 @@ const userService = new UserService(userModel);
 const userController = new UserController(userService);
 const userRoutes = express.Router();
 
-userRoutes.get('/me', authMiddleware, (req, res) => userController.getProfile(req, res));
-userRoutes.put('/me', authMiddleware, (req, res) => userController.updateProfile(req, res));
-userRoutes.delete('/me', authMiddleware, (req, res) => userController.deleteAccount(req, res));
+userRoutes.get('/me', authMiddleware, (req, res, next) => userController.getProfile(req, res, next));
+userRoutes.put('/me', authMiddleware, (req, res, next) => userController.updateProfile(req, res, next));
+userRoutes.delete('/me', authMiddleware, (req, res, next) => userController.deleteAccount(req, res, next));
 
 export default userRoutes;

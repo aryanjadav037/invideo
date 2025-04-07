@@ -20,6 +20,16 @@ class SignupController {
             console.log(error);
         }
     }
+
+    async verifyEmail(req, res, next) {
+        try {
+            const { token } = req.params;
+            await this.authService.verifyEmail(token);
+            res.redirect("http://localhost:5173/login");
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default SignupController;
