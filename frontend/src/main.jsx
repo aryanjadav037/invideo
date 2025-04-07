@@ -5,32 +5,36 @@ import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from './Layout/Layout.jsx'
 import LoginModal from './Pages/LoginModal.jsx'
-import HeroSection from './Pages/HeroSection.jsx' // Add this import
+import HeroSection from './Pages/HeroSection.jsx'
 import SignUpModal from './Pages/SignUpModal .jsx'
+import Workspace from './Pages/Workspace.jsx' // Add this import
+import AuthProvider from './context/AuthContext.jsx' // Import AuthProvider
+import ProtectedRoute from './components/ProtectedRoute.jsx' // We'll create this next
+import SimpleLayout from './Layout/SimpleLayout.jsx'
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout/>,
+    element: <Layout/>, // Uses Navbar+Footer
     children: [
-      {
-        path: "/",
-        element: <HeroSection/>, // This will be your homepage
-      },
-      {
-        path: "/signup",
-        element: <SignUpModal/>,
-      },
-      {
-        path: "/login",
-        element: <LoginModal />,
-      },
-      // You can add more routes here as needed
+      { path: "/", element: <HeroSection/> },
+      { path: "/signup", element: <SignUpModal/> },
+      { path: "/login", element: <LoginModal /> },
+    ],
+  },
+  {
+    path: "/",
+    element: <SimpleLayout/>, // No Navbar/Footer
+    children: [
+      { path: "/workspace", element: <ProtectedRoute><Workspace /></ProtectedRoute> },
+      // Add other pages that shouldn't have Navbar/Footer here
     ],
   },
 ]);
-
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>,
 )
