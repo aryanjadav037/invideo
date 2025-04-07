@@ -24,8 +24,10 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.1",
     "node-fetch": "^3.3.2",
+    "nodemailer": "^6.10.0",
     "nodemon": "^3.1.9",
     "path": "^0.12.7",
+    "resend": "^4.2.0",
     "zod": "^3.24.2"
   }
 }

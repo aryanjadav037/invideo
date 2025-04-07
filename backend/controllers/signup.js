@@ -6,8 +6,26 @@ class SignupController {
     async signup(req, res, next) {
         try {
             const { Username, Full_Name, email, password, dob, role } = req.body;
-            const user = await this.authService.register(Username, Full_Name, email, password, dob, role);
-            res.status(201).json({ success: true, user });
+
+            const result = await this.authService.register(
+                Username, Full_Name, email, password, dob, role
+            );
+
+            res.status(201).json({
+                success: true,
+                message: result.message || 'Signup successful. Please verify your email.'
+            });
+        } catch (error) {
+            next(error);
+            console.log(error);
+        }
+    }
+
+    async verifyEmail(req, res, next) {
+        try {
+            const { token } = req.params;
+            await this.authService.verifyEmail(token);
+            res.redirect("http://localhost:5173/login");
         } catch (error) {
             next(error);
         }
