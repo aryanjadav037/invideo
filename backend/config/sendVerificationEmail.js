@@ -6,8 +6,8 @@ export const sendVerificationEmail = async (email, token) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.MAIL_USER, // Your Gmail address
-      pass: process.env.MAIL_PASS, // App password if 2FA enabled
+      user: process.env.MAIL_USER, 
+      pass: process.env.MAIL_PASS, 
     },
   });
 
@@ -32,7 +32,7 @@ export const sendVerificationEmail = async (email, token) => {
     </div>
   `;
 
-  console.log('Sending verification email to:', email);
+  // console.log('Sending verification email to:', email);
 
   const mailOptions = {
     from: `"AImagicx" <${process.env.MAIL_USER}>`,
@@ -42,7 +42,6 @@ export const sendVerificationEmail = async (email, token) => {
   };
 
   const res = await transporter.sendMail(mailOptions);
-  console.log("res :: ", res)
 };
 
 export default sendVerificationEmail;
