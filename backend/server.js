@@ -7,6 +7,8 @@ import cors from "cors";
 import ImageRoutes from './routes/imageRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import CookieParser from 'cookie-parser';
+import verifyEmailRoutes from './routes/verifyEmail.js';
+
 dotenv.config();
 const app = express();
 
@@ -26,6 +28,7 @@ app.use(
 
 app.use('/api/auth', authRoutes);
 app.use('/api/image', ImageRoutes);
+app.use('/api/verify', verifyEmailRoutes);
 app.use('/api/user', userRoutes);
 
 app.get('/', (req, res) => {
