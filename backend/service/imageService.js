@@ -1,4 +1,3 @@
-// imageService.js
 
 import axios from "axios";
 import ImageModel from "../models/imageModel.js";
