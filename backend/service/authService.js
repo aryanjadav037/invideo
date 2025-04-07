@@ -1,4 +1,4 @@
-// service/authService.js
+
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '../config/sendVerificationEmail.js';
