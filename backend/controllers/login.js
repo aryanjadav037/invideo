@@ -22,7 +22,7 @@ class LoginController {
 
     async logout(req, res, next) {
         try {
-            await this.authService.logout(req.user);
+            await this.authService.logout(res);
             res.status(200).json({ success: true, message: 'Logged out successfully' });
         } catch (error) {
             next(error);
