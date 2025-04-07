@@ -1,10 +1,15 @@
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import nodemailer from 'nodemailer';
 
 export const sendVerificationEmail = async (email, token) => {
-  // const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${token}`;
   const verificationUrl = `${process.env.CLIENT_URL}/api/verify/${token}`;
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.MAIL_USER, // Your Gmail address
+      pass: process.env.MAIL_PASS, // App password if 2FA enabled
+    },
+  });
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; color: #333;">
@@ -27,10 +32,17 @@ export const sendVerificationEmail = async (email, token) => {
     </div>
   `;
 
-  await resend.emails.send({
-    from: 'Invideo <onboarding@resend.dev>',
-    to: [email],
-    subject: 'Verify Your Email Address',
+  console.log('Sending verification email to:', email);
+
+  const mailOptions = {
+    from: `"AImagicx" <${process.env.MAIL_USER}>`,
+    to: email,
+    subject: 'Verify Your Email',
     html: htmlContent,
-  });
+  };
+
+  const res = await transporter.sendMail(mailOptions);
+  console.log("res :: ", res)
 };
+
+export default sendVerificationEmail;

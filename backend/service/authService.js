@@ -49,6 +49,8 @@ class AuthService {
     return this.tokenService.generateToken(user);
   }
 
+  
+
   async logout(res) {
     res.clearCookie("auth_token", {
       httpOnly: true,
