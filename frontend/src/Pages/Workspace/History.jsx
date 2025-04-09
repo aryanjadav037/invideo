@@ -1,20 +1,61 @@
-"use client"
-
 import { useState } from "react"
-import { Clock, ImageIcon, MessageSquare, Download, Share, Copy, Check, Maximize2, X } from "lucide-react"
+import { Clock, ImageIcon, MessageSquare, Download, Share, Copy, Check, Maximize2, X, Trash2 } from "lucide-react"
+import axios from "axios"
 
-export default function History({ history, FALLBACK_IMAGE }) {
+export default function History({ history, FALLBACK_IMAGE, updateHistory }) {
   const [expandedItem, setExpandedItem] = useState(null)
   const [actionStates, setActionStates] = useState({})
+  const [isDeleting, setIsDeleting] = useState({})
 
   if (!history || history.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 mt-4 rounded-xl border border-gray-800 bg-gradient-to-b from-gray-900 to-gray-950">
-        <Clock className="w-12 h-12 text-gray-500 mb-3 opacity-75" />
-        <h3 className="text-lg font-medium text-gray-400">No history yet</h3>
-        <p className="text-gray-500 text-sm mt-1 text-center">Your generation history will appear here</p>
+      <div className="flex flex-col items-center justify-center p-8 mt-4 rounded-2xl border border-gray-800 bg-gradient-to-b from-gray-900 to-gray-950 shadow-lg shadow-purple-900/5">
+        <Clock className="w-16 h-16 text-gray-500 mb-4 opacity-60" />
+        <h3 className="text-xl font-medium text-gray-400 mb-2">No history yet</h3>
+        <p className="text-gray-500 text-sm mt-1 text-center max-w-sm">Your generation history will appear here once you create something</p>
       </div>
     )
+  }
+
+  // Function to delete an image from history
+  const deleteImage = async (index) => {
+    const item = history[index]
+    
+    // Check if item has an id
+    if (!item || !item.id) {
+      console.error("Cannot delete: Item or item ID is missing")
+      return
+    }
+    
+    // Set deleting state
+    setIsDeleting(prev => ({
+      ...prev,
+      [index]: true
+    }))
+    
+    try {
+      const response = await axios.delete(
+        `http://localhost:5005/api/image/delete/${item.id}`,
+        { withCredentials: true }
+      )
+      
+      if (response.data?.success) {
+        // Filter out the deleted item from history
+        const updatedHistory = history.filter((_, idx) => idx !== index)
+        // Update parent component with new history
+        updateHistory(updatedHistory)
+      } else {
+        throw new Error(response.data?.message || "Failed to delete image")
+      }
+    } catch (err) {
+      console.error("Delete image error:", err)
+      alert("Failed to delete image. Please try again.")
+    } finally {
+      setIsDeleting(prev => ({
+        ...prev,
+        [index]: false
+      }))
+    }
   }
 
   // Function to copy image to clipboard with canvas approach
@@ -212,23 +253,25 @@ export default function History({ history, FALLBACK_IMAGE }) {
     const imageUrl = item.imageUrl || item.content;
     
     return (
-      <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-fadeIn">
-        <div className="relative bg-gray-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-gray-800">
-            <h3 className="text-lg font-medium text-white">Image Preview</h3>
+      <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 animate-fadeIn backdrop-blur-sm">
+        <div className="relative bg-gray-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-gray-800 shadow-2xl">
+          <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gradient-to-r from-gray-900 to-gray-800">
+            <h3 className="text-lg font-medium text-white flex items-center gap-2">
+              <Maximize2 className="w-5 h-5 text-purple-400" /> Image Preview
+            </h3>
             <button 
               onClick={() => setExpandedItem(null)}
-              className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-800 transition-colors"
+              className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-800 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
           
-          <div className="flex-1 overflow-auto p-4 relative">
+          <div className="flex-1 overflow-auto p-6 relative bg-grid-pattern">
             <img
               src={imageUrl}
               alt={`Generated image: ${item.prompt}`}
-              className="max-w-full max-h-[70vh] object-contain mx-auto rounded-md"
+              className="max-w-full max-h-[70vh] object-contain mx-auto rounded-md shadow-xl"
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 e.currentTarget.src = FALLBACK_IMAGE;
@@ -238,12 +281,12 @@ export default function History({ history, FALLBACK_IMAGE }) {
           </div>
           
           <div className="p-4 border-t border-gray-800 bg-gray-950">
-            <p className="text-sm text-gray-300 mb-4">{item.prompt}</p>
+            <p className="text-sm text-gray-300 mb-4 max-h-20 overflow-y-auto p-2 rounded bg-gray-900/50">{item.prompt}</p>
             
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => downloadImage(imageUrl, item.prompt, expandedItem)}
-                className="flex items-center bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg text-sm transition-all duration-300 shadow-md hover:shadow-green-500/30"
+                className="flex items-center bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white px-5 py-2.5 rounded-lg text-sm transition-all duration-300 shadow-md hover:shadow-green-500/30 font-medium"
               >
                 {actionStates[`download-${expandedItem}`] ? (
                   <>
@@ -258,7 +301,7 @@ export default function History({ history, FALLBACK_IMAGE }) {
               
               <button
                 onClick={() => shareImage(imageUrl, item.prompt, expandedItem)}
-                className="flex items-center bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-4 py-2 rounded-lg text-sm transition-all duration-300 shadow-md hover:shadow-purple-500/30"
+                className="flex items-center bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm transition-all duration-300 shadow-md hover:shadow-purple-500/30 font-medium"
               >
                 {actionStates[`share-${expandedItem}`] ? (
                   <>
@@ -273,7 +316,7 @@ export default function History({ history, FALLBACK_IMAGE }) {
               
               <button
                 onClick={() => copyImageToClipboard(imageUrl, expandedItem)}
-                className="flex items-center bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg text-sm transition-all duration-300 shadow-md hover:shadow-blue-500/30"
+                className="flex items-center bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-5 py-2.5 rounded-lg text-sm transition-all duration-300 shadow-md hover:shadow-blue-500/30 font-medium"
               >
                 {actionStates[`copy-${expandedItem}`] ? (
                   <>
@@ -282,6 +325,22 @@ export default function History({ history, FALLBACK_IMAGE }) {
                 ) : (
                   <>
                     <Copy className="w-4 h-4 mr-2" /> Copy
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={() => deleteImage(expandedItem)}
+                className="flex items-center bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-5 py-2.5 rounded-lg text-sm transition-all duration-300 shadow-md hover:shadow-red-500/30 font-medium"
+                disabled={isDeleting[expandedItem]}
+              >
+                {isDeleting[expandedItem] ? (
+                  <>
+                    <Clock className="w-4 h-4 mr-2 animate-spin" /> Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2" /> Delete
                   </>
                 )}
               </button>
@@ -294,18 +353,18 @@ export default function History({ history, FALLBACK_IMAGE }) {
 
   return (
     <div className="space-y-6 pb-4">
-      <h2 className="text-xl font-semibold flex items-center gap-2 text-white/90 mb-4">
-        <Clock className="w-5 h-5" />
+      <h2 className="text-xl font-semibold flex items-center gap-2 text-white/90 mb-6 pb-2 border-b border-gray-800">
+        <Clock className="w-5 h-5 text-purple-400" />
         Generation History
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {history.map((item, index) => {
           const imageUrl = item.imageUrl || item.content;
           return (
             <div
               key={index}
-              className="group relative overflow-hidden rounded-xl border border-gray-800 bg-gradient-to-br from-gray-900 to-gray-950 hover:shadow-lg hover:shadow-purple-900/10 transition-all duration-300"
+              className="group relative overflow-hidden rounded-xl border border-gray-800 bg-gradient-to-b from-gray-900 to-gray-950 hover:shadow-lg hover:shadow-purple-900/20 transition-all duration-300 hover:border-purple-900/50 transform hover:-translate-y-1"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -316,7 +375,9 @@ export default function History({ history, FALLBACK_IMAGE }) {
                       <MessageSquare className="w-4 h-4 text-purple-400" />
                       <span className="text-xs font-medium text-gray-400">Prompt</span>
                     </div>
-                    <span className="text-xs text-gray-500">#{history.length - index}</span>
+                    <div className="flex items-center">
+                      <span className="text-xs font-mono text-gray-500 bg-gray-800/50 px-2 py-0.5 rounded-full">#{history.length - index}</span>
+                    </div>
                   </div>
 
                   <p className="text-sm text-gray-300 line-clamp-2 group-hover:line-clamp-none transition-all duration-300">
@@ -325,13 +386,13 @@ export default function History({ history, FALLBACK_IMAGE }) {
                 </div>
 
                 <div className="p-4 pt-0">
-                  <div className="relative overflow-hidden rounded-lg bg-gray-950 aspect-video flex items-center justify-center group-hover:ring-1 group-hover:ring-purple-500/30 transition-all duration-300">
+                  <div className="relative overflow-hidden rounded-lg bg-gray-950 aspect-video flex items-center justify-center group-hover:ring-2 group-hover:ring-purple-500/30 transition-all duration-300">
                     {imageUrl ? (
                       <>
                         <img
                           src={imageUrl}
                           alt={`Generated image: ${item.prompt}`}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = FALLBACK_IMAGE;
@@ -340,10 +401,10 @@ export default function History({ history, FALLBACK_IMAGE }) {
                         />
                         
                         {/* Quick action buttons overlay */}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
                           <button
                             onClick={() => setExpandedItem(index)}
-                            className="bg-gray-900/70 hover:bg-gray-800 p-2 rounded-full text-white transition-all hover:scale-110 hover:shadow-lg"
+                            className="bg-gray-900/80 hover:bg-gray-800 p-2 rounded-full text-white transition-all hover:scale-110 hover:shadow-lg border border-gray-700/50"
                             title="Expand image"
                           >
                             <Maximize2 className="w-5 h-5" />
@@ -351,7 +412,7 @@ export default function History({ history, FALLBACK_IMAGE }) {
                           
                           <button
                             onClick={() => downloadImage(imageUrl, item.prompt, index)}
-                            className="bg-green-800/70 hover:bg-green-700 p-2 rounded-full text-white transition-all hover:scale-110 hover:shadow-lg"
+                            className="bg-green-800/80 hover:bg-green-700 p-2 rounded-full text-white transition-all hover:scale-110 hover:shadow-lg border border-green-700/50"
                             title="Download image"
                           >
                             {actionStates[`download-${index}`] ? (
@@ -363,7 +424,7 @@ export default function History({ history, FALLBACK_IMAGE }) {
                           
                           <button
                             onClick={() => copyImageToClipboard(imageUrl, index)}
-                            className="bg-blue-800/70 hover:bg-blue-700 p-2 rounded-full text-white transition-all hover:scale-110 hover:shadow-lg"
+                            className="bg-blue-800/80 hover:bg-blue-700 p-2 rounded-full text-white transition-all hover:scale-110 hover:shadow-lg border border-blue-700/50"
                             title="Copy image"
                           >
                             {actionStates[`copy-${index}`] ? (
@@ -375,13 +436,26 @@ export default function History({ history, FALLBACK_IMAGE }) {
                           
                           <button
                             onClick={() => shareImage(imageUrl, item.prompt, index)}
-                            className="bg-purple-800/70 hover:bg-purple-700 p-2 rounded-full text-white transition-all hover:scale-110 hover:shadow-lg"
+                            className="bg-purple-800/80 hover:bg-purple-700 p-2 rounded-full text-white transition-all hover:scale-110 hover:shadow-lg border border-purple-700/50"
                             title="Share image"
                           >
                             {actionStates[`share-${index}`] ? (
                               <Check className="w-5 h-5" />
                             ) : (
                               <Share className="w-5 h-5" />
+                            )}
+                          </button>
+                          
+                          <button
+                            onClick={() => deleteImage(index)}
+                            className="bg-red-800/80 hover:bg-red-700 p-2 rounded-full text-white transition-all hover:scale-110 hover:shadow-lg border border-red-700/50"
+                            title="Delete image"
+                            disabled={isDeleting[index]}
+                          >
+                            {isDeleting[index] ? (
+                              <Clock className="w-5 h-5 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-5 h-5" />
                             )}
                           </button>
                         </div>

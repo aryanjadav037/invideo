@@ -5,15 +5,16 @@ import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from './Layout/Layout.jsx'
 import HeroSection from './Pages/HeroSection.jsx'
-import SignUpModal from './Pages/SignUpModal .jsx'
-import LoginModal from './Pages/LoginModal.jsx'
+ // Renamed from SignUpModal
+import LoginPage from './Pages/LoginModal.jsx'   // Renamed from LoginModal
+import SignUpPage from './Pages/SignUpModal .jsx'   // Renamed from LoginModal
 import { AuthProvider } from './context/AuthContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import SimpleLayout from './Layout/SimpleLayout.jsx'
 import ProfilePage from './Pages/Workspace/ProfilePage.jsx'
 import Workspace from './Pages/Workspace/WorkSpace.jsx'
 import ErrorPage from './Pages/ErrorPage.jsx'
-import EmailVerificationPage from './Pages/EmailVerificationPage.jsx' // Import the new component
+import EmailVerificationPage from './Pages/EmailVerificationPage.jsx'
 
 const router = createBrowserRouter([
   {
@@ -22,15 +23,33 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { path: "/", element: <HeroSection/> },
-      { path: "/signup", element: <SignUpModal/> },
-      { path: "/login", element: <LoginModal /> },
-      { path: "/verify-email", element: <EmailVerificationPage /> }, // Add new route
+      // Removed signup and login from here
     ],
   },
   {
+    path: "/signup",
+    element: <SimpleLayout/>, // Will not show Navbar/Footer
+    children: [
+      { index: true, element: <SignUpPage /> }
+    ]
+  },
+  {
+    path: "/login",
+    element: <SimpleLayout/>, // Will not show Navbar/Footer
+    children: [
+      { index: true, element: <LoginPage /> }
+    ]
+  },
+  {
+    path: "/verify-email",
+    element: <SimpleLayout/>,
+    children: [
+      { index: true, element: <EmailVerificationPage /> }
+    ]
+  },
+  {
     path: "/",
-    element: <SimpleLayout/>, // No Navbar/Footer]
-    errorElement: <ErrorPage />,
+    element: <SimpleLayout/>, // No Navbar/Footer
     children: [
       { 
         path: "/workspace", 

@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const dropdowns = {
   ai: {
     title: "Invideo AI",
-    titleColor: "text-[#ff356d] font-bold",
+    titleColor: "text-cyan-400 font-bold",
     items: [
       {
         title: "AI Video Generator",
@@ -25,15 +25,15 @@ const dropdowns = {
       },
       {
         links: [
-          { to: "/ai-login", text: "AI Login", className: "text-[#ff356d] font-bold" },
-          { to: "/ai-signup", text: "AI Sign Up", className: "text-[#ff356d] font-bold" },
+          { to: "/ai-login", text: "AI Login", className: "text-cyan-400 font-bold" },
+          { to: "/ai-signup", text: "AI Sign Up", className: "text-purple-500 font-bold" },
         ],
       },
     ],
   },
   studio: {
     title: "Invideo Studio",
-    titleColor: "text-[#848282]",
+    titleColor: "text-blue-400",
     items: [
       {
         title: "Studio Features",
@@ -49,7 +49,7 @@ const dropdowns = {
   },
   help: {
     title: "Help",
-    titleColor: "text-[#999595]",
+    titleColor: "text-purple-400",
     items: [
       {
         links: [
@@ -66,22 +66,39 @@ const dropdowns = {
 const Navbar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const toggleDropdown = (menu) => {
     setOpenDropdown(openDropdown === menu ? null : menu);
   };
 
   return (
-    <nav className="bg-[#fcfcfc] shadow-md fixed top-0 left-0 w-full z-50">
-      <div className="container mx-auto flex justify-between items-center px-10 md:px-20 lg:px-30 h-14">
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+      scrolled ? 'bg-black/80 backdrop-blur-md shadow-lg shadow-blue-900/20' : 'bg-black/30 backdrop-blur-sm'
+    }`}>
+      <div className="container mx-auto flex justify-between items-center px-6 md:px-10 lg:px-16 h-16">
         
         {/* Logo */}
         <div className="flex-shrink-0 mr-10">
-          <h1 className="text-xl font-bold text-black">My App</h1>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text">My App</h1>
         </div>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex flex-1 justify-start">
-          <ul className="flex space-x-6  font-semibold">
+          <ul className="flex space-x-6 font-semibold">
             {Object.entries(dropdowns).map(([key, { title, titleColor, items }]) => (
               <li
                 key={key}
@@ -89,10 +106,10 @@ const Navbar = () => {
                 onMouseEnter={() => setOpenDropdown(key)}
                 onMouseLeave={() => setOpenDropdown(null)}
               >
-                <button className={`flex items-center ${titleColor} hover:text-blue-500`}>
+                <button className={`flex items-center ${titleColor} hover:text-white transition-colors duration-300`}>
                   {title}
                   <svg
-                    className={`w-4 h-4 ml-1 transition-transform ${openDropdown === key ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 ml-1 transition-transform duration-300 ${openDropdown === key ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -104,12 +121,12 @@ const Navbar = () => {
 
                 {/* Dropdown */}
                 {openDropdown === key && (
-                  <div className="absolute left-0 mt-0 w-56 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100">
+                  <div className="absolute left-0 mt-2 w-64 bg-gray-900/90 backdrop-blur-md rounded-md shadow-lg py-1 z-50 border border-gray-800 shadow-blue-900/20">
                     {items.map((item, index) => (
                       <div key={index}>
                         {item.title && (
-                          <div className="px-4 py-2 border-b border-gray-100">
-                            <h3 className="text-sm font-bold text-gray-900">{item.title}</h3>
+                          <div className="px-4 py-2 border-b border-gray-800">
+                            <h3 className="text-sm font-bold text-cyan-400">{item.title}</h3>
                           </div>
                         )}
                         <div className={item.grid ? "grid grid-cols-2 gap-1 p-2" : "px-4 py-2"}>
@@ -117,7 +134,7 @@ const Navbar = () => {
                             <Link
                               key={linkIndex}
                               to={to}
-                              className={`text-xs px-4 py-2 hover:bg-gray-50 block ${className || 'text-gray-700'}`}
+                              className={`text-xs px-4 py-2 hover:bg-blue-900/30 block rounded transition-colors duration-200 ${className || 'text-gray-300'}`}
                             >
                               {text}
                             </Link>
@@ -131,51 +148,50 @@ const Navbar = () => {
             ))}
 
             {/* Non-dropdown links */}
-            <li><Link to="/community" className="text-[#999595] hover:text-blue-500">Community</Link></li>
-            <li><Link to="/pricing" className="text-[#999595] hover:text-blue-500">Pricing</Link></li>
+            <li><Link to="/community" className="text-gray-300 hover:text-white transition-colors duration-300">Community</Link></li>
+            <li><Link to="/pricing" className="text-gray-300 hover:text-white transition-colors duration-300">Pricing</Link></li>
           </ul>
         </div>
 
         {/* Desktop Buttons */}
         <div className="hidden md:flex items-center space-x-4 font-bold">
-          <Link to="/login" className="text-[#999595] rounded">Login</Link>
-          <Link to="/signup" className="text-blue-500 font-bold px-2 border-2 border-blue-500 rounded-xl hover:bg-black hover:text-white transition">
-            Sign Up
-          </Link> 
+          <Link to="/login" className="text-gray-300 hover:text-white transition-colors duration-300">Login</Link>
+          <Link to="/signup" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold px-4 py-1 rounded-lg hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 relative overflow-hidden group">
+            <span className="absolute inset-0 w-full h-full bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
+            <span className="relative">Sign Up</span>
+          </Link>
         </div>
+        
         {/* Mobile Menu Button */}
         <button 
-          className="md:hidden text-black focus:outline-none"
+          className="md:hidden text-white focus:outline-none"
           onClick={() => setIsMobileOpen(!isMobileOpen)}
         >
-          {isMobileOpen ? "✕" : "☰"}
+          {isMobileOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
         </button>
       </div>
 
       {/* Mobile Menu */}
       {isMobileOpen && (
-        <div className="md:hidden bg-white shadow-lg">
-          {/* <div className="flex justify-end p-4">
-            <button
-              onClick={() => {
-                setIsMobileOpen(false);
-                setOpenDropdown(null);
-              }}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
-          </div> */}
+        <div className="md:hidden bg-gray-900/95 backdrop-blur-md shadow-lg border-t border-gray-800 max-h-[80vh] overflow-y-auto">
           <ul className="flex flex-col pb-4 px-5 space-y-2">
             {Object.entries(dropdowns).map(([key, { title, titleColor, items }]) => (
               <li key={key} className="w-full">
                 <button
-                  className={`flex items-center justify-between w-full py-2 ${titleColor || 'text-black'}`}
+                  className={`flex items-center justify-between w-full py-2 ${titleColor || 'text-white'}`}
                   onClick={() => toggleDropdown(key)}
                 >
                   <span>{title}</span>
                   <svg
-                    className={`w-4 h-4 ml-1 transition-transform ${openDropdown === key ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 ml-1 transition-transform duration-300 ${openDropdown === key ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -187,11 +203,11 @@ const Navbar = () => {
                 
                 {/* Submenu */}
                 {openDropdown === key && (
-                  <div className="ml-4 mt-2 space-y-2 border-l border-gray-200 pl-2">
+                  <div className="ml-4 mt-2 space-y-2 border-l border-blue-800/50 pl-2">
                     {items.map((item, index) => (
                       <div key={index} className="space-y-1">
                         {item.title && (
-                          <div className="font-medium text-gray-500 text-xs pt-2">
+                          <div className="font-medium text-cyan-400 text-xs pt-2">
                             {item.title}
                           </div>
                         )}
@@ -200,7 +216,7 @@ const Navbar = () => {
                             <Link
                               key={linkIndex}
                               to={to}
-                              className={`block py-1 text-sm ${className || 'text-gray-700'}`}
+                              className={`block py-1 text-sm ${className || 'text-gray-300'} hover:text-white`}
                               onClick={() => setIsMobileOpen(false)}
                             >
                               {text}
@@ -216,18 +232,18 @@ const Navbar = () => {
 
             {/* Non-dropdown links */}
             <li>
-              <Link to="/community" className="block py-2 text-black">Community</Link>
+              <Link to="/community" className="block py-2 text-gray-300 hover:text-white">Community</Link>
             </li>
             <li>
-              <Link to="/pricing" className="block py-2 text-black">Pricing</Link>
+              <Link to="/pricing" className="block py-2 text-gray-300 hover:text-white">Pricing</Link>
             </li>
             <li>
-              <Link to="/login" className="block py-2 text-black">Login</Link>
+              <Link to="/login" className="block py-2 text-gray-300 hover:text-white">Login</Link>
             </li>
             <li>
               <Link
                 to="/signup"
-                className="block w-full py-2 text-center text-black border border-black rounded hover:bg-black hover:text-white transition"
+                className="block w-full py-2 text-center text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg mt-4"
               >
                 Sign Up
               </Link>
