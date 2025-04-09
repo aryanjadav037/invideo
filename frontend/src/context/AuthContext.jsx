@@ -1,60 +1,68 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback } from 'react';
 
 export const AuthContext = createContext();
 
-const AuthProvider = ({ children }) => {
-  const [authState, setAuthState] = useState({
-    isAuthenticated: false,
-    user: null,
-    token: null,
-  });
+export const AuthProvider = ({ children }) => {
+    const [authState, setAuthState] = useState({
+        isAuthenticated: false,
+        user: null,
+        isLoading: true
+    });
 
-  useEffect(() => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const userData = localStorage.getItem("userData");
-      if (token && userData) {
-        const user = JSON.parse(userData);
-        if (user && token) {
-          setAuthState({
+    // Initialize auth state from localStorage
+    useEffect(() => {
+        const initializeAuth = () => {
+            const token = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData');
+            
+            if (token && userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    setAuthState({
+                        isAuthenticated: true,
+                        user,
+                        isLoading: false
+                    });
+                } catch (error) {
+                    console.error('Failed to parse user data:', error);
+                    localStorage.removeItem('userData');
+                    setAuthState(prev => ({ ...prev, isLoading: false }));
+                }
+            } else {
+                setAuthState(prev => ({ ...prev, isLoading: false }));
+            }
+        };
+        
+        initializeAuth();
+    }, []);
+
+    const login = useCallback((token, userData) => {
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('userData', JSON.stringify(userData));
+        setAuthState({
             isAuthenticated: true,
-            user,
-            token,
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Failed to parse user data:", error);
-      // Clear corrupted data
-      localStorage.removeItem("userData");
-    }
-  }, []);
+            user: userData,
+            isLoading: false
+        });
+    }, []);
 
-  const login = (token, userData) => {
-    localStorage.setItem("authToken", token);
-    localStorage.setItem("userData", JSON.stringify(userData));
-    setAuthState({
-      isAuthenticated: true,
-      user: userData,
-      token,
-    });
-  };
+    const logout = useCallback(() => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        setAuthState({
+            isAuthenticated: false,
+            user: null,
+            isLoading: false
+        });
+    }, []);
 
-  const logout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userData");
-    setAuthState({
-      isAuthenticated: false,
-      user: null,
-      token: null,
-    });
-  };
-
-  return (
-    <AuthContext.Provider value={{ ...authState, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+    return (
+        <AuthContext.Provider value={{ 
+            ...authState, 
+            login, 
+            logout 
+        }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
-
-export default AuthProvider;

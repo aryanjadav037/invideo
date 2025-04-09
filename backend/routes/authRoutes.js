@@ -15,8 +15,8 @@ const signupController = new SignupController(authService);
 const loginController = new LoginController(authService);
 const googleController = new GoogleController(googleService);
 
-router.post('/signup', (req, res) => signupController.signup(req, res));
-router.post('/login', (req, res) => loginController.login(req, res));
+router.post('/signup', (req, res, next) => signupController.signup(req, res, next));
+router.post('/login', (req, res, next) => loginController.login(req, res, next));
 router.post('/logout', (req, res) => loginController.logout(req, res));
 router.get('/google', (req, res) => googleController.gAuth(req, res));
 router.get('/google/callback', (req, res) => googleController.authenticateCallback(req, res));
