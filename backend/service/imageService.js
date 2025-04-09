@@ -4,6 +4,7 @@ import ImageModel from "../models/imageModel.js";
 
 const CLOUDFLARE_API_URL = process.env.CLOUDFLARE_API_URL;
 const CLOUDFLARE_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN;
+const CLOUDFLARE_TEXT_URL = process.env.CLOUDFLARE_TEXT_URL;
 
 const generateImage = async (prompt) => {
   try {
@@ -33,6 +34,52 @@ const generateImage = async (prompt) => {
     };
   } catch (error) {
     console.error("❌ Error generating image:", error.message);
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+};
+
+const enhencePrompt = async (prompt) => {
+  try {
+    const response = await axios.post(
+      CLOUDFLARE_TEXT_URL,
+      {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a prompt enhancer for image generation. Return a concise and vivid image prompt in 1–2 lines. Do NOT include phrases like 'how about' or 'imagine'. Output only the enhanced prompt."
+          },
+          {
+            "role": "user",
+            "content": prompt
+          }
+        ],
+      }
+      ,
+      {
+        headers: {
+          Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        responseType: "arraybuffer", // Ensures binary data handling
+      }
+    );
+
+    // Check for errors in response
+    if (response.status !== 200) {
+      throw new Error("Failed to generate image");
+    }
+
+    const enhencedPrompt = JSON.parse((response.data).toString())
+
+    return {
+      success: true,
+      prompt: enhencedPrompt.result.response
+    };
+  } catch (error) {
+    console.error("❌ Error enhencing prompt:", error.message);
     return {
       success: false,
       message: error.message,
