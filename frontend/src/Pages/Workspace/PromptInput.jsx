@@ -20,7 +20,7 @@ const PromptInput = ({ prompt, onChange, onGenerate, isLoading, maxChars }) => {
     setIsEnhancing(true);
     try {
       const response = await axios.post(
-        'https://e2df-106-213-27-70.ngrok-free.app/api/image/enhence',
+        'http://localhost:5005/api/image/enhence',
         { prompt }, // body
         {
           headers: {
