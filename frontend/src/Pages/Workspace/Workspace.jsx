@@ -1,7 +1,7 @@
 import React, { useState, useContext, useRef, useEffect } from "react";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom"; // Add this import
+import { useNavigate } from "react-router-dom"; 
 import Header from "./Header";
 import ProfileDropdown from "./ProfileDropdown";
 import OutputDisplay from "./OutputDisplay";
@@ -11,8 +11,8 @@ import PromptInput from "./PromptInput";
 import { FaImage, FaFilm, FaLightbulb, FaScroll } from "react-icons/fa";
 
 const Workspace = () => {
-  const { user, logout } = useContext(AuthContext); // Get logout function from context
-  const navigate = useNavigate(); // Add navigation hook
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [prompt, setPrompt] = useState("");
   const [output, setOutput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,6 +70,11 @@ const Workspace = () => {
     }
   }, [user, navigate, logout]);
 
+  // Function to update history (used when an item is deleted)
+  const updateHistory = (newHistory) => {
+    setHistory(newHistory);
+  };
+
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -115,6 +120,7 @@ const Workspace = () => {
         content: response.data.data || FALLBACK_IMAGE,
         prompt,
         timestamp: new Date().toISOString(),
+        id: response.data.id // Make sure the API returns an ID
       };
       setOutput(newOutput);
       setHistory((prev) => [newOutput, ...prev]);
@@ -189,7 +195,11 @@ const Workspace = () => {
             ))}
           </div>
           <div className="flex-1 overflow-y-auto pb-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
-            <History history={history} FALLBACK_IMAGE={FALLBACK_IMAGE} />
+            <History 
+              history={history} 
+              FALLBACK_IMAGE={FALLBACK_IMAGE} 
+              updateHistory={updateHistory}
+            />
             <div ref={historyEndRef} />
             <OutputDisplay
               error={error}

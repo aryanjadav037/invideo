@@ -32,7 +32,7 @@ export const sendVerificationEmail = async (email, token) => {
     </div>
   `;
 
-  console.log('Sending verification email to:', email);
+  // console.log('Sending verification email to:', email);
 
   const mailOptions = {
     from: `"AImagicx" <${process.env.MAIL_USER}>`,

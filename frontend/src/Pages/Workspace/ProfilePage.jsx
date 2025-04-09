@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { ArrowLeft, Save, X, Edit3, User, Calendar, Mail } from 'lucide-react';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
@@ -12,19 +13,58 @@ const ProfilePage = () => {
         email: '',
         dob: ''
     });
+    const [errors, setErrors] = useState({
+        dob: ''
+    });
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
 
+    // Validate date of birth (must be at least 5 years old)
+    const validateDOB = (dateString) => {
+        if (!dateString) return true; // Allow empty dates
+        
+        const dob = new Date(dateString);
+        const today = new Date();
+        const minAgeDate = new Date(today.getFullYear() - 5, today.getMonth(), today.getDate());
+        
+        return dob <= minAgeDate;
+    };
+
+    // Format date for input field (YYYY-MM-DD)
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '';
+            return date.toISOString().split('T')[0];
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return '';
+        }
+    };
+
+    // Initialize form data with user data
     useEffect(() => {
         setFormData({
             username: user?.data?.Username || '',
             fullName: user?.data?.Full_Name || '',
             email: user?.data?.email || '',
-            dob: new Date(user?.data?.dob).toISOString().split('T')[0] || '',
+            dob: formatDate(user?.data?.dob),
         });
     }, [user]);
 
+    // Save profile data
     const handleSave = async () => {
+        // Validate before saving
+        if (formData.dob && !validateDOB(formData.dob)) {
+            setErrors(prev => ({
+                ...prev,
+                dob: 'User must be at least 5 years old'
+            }));
+            return;
+        }
+        
         try {
             setIsSaving(true);
 
@@ -43,15 +83,17 @@ const ProfilePage = () => {
                 }
             );
 
-            // Update context or localStorage if needed
+            // Update context with new user data
             await updateUser({
                 Username: formData.username,
                 Full_Name: formData.fullName,
-                DOB: formData.dob
+                dob: formData.dob
             });
 
             setIsEditing(false);
-            alert('Profile updated successfully');
+            setSaveSuccess(true);
+            setTimeout(() => setSaveSuccess(false), 3000);
+            setErrors({ dob: '' }); // Clear errors on success
         } catch (error) {
             console.error('Error updating profile:', error);
             alert('Failed to update profile. Please try again.');
@@ -60,142 +102,220 @@ const ProfilePage = () => {
         }
     };
 
+    // Handle form field changes
     const handleChange = (e) => {
         const { name, value } = e.target;
+        
+        // Validate DOB on change
+        if (name === 'dob' && value) {
+            const isValid = validateDOB(value);
+            setErrors(prev => ({
+                ...prev,
+                dob: isValid ? '' : 'User must be at least 5 years old'
+            }));
+        }
+        
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    // Toggle edit mode
     const toggleEditMode = () => {
         if (isEditing) {
+            // Reset form to original values when canceling
             setFormData({
                 username: user?.data?.Username || '',
                 fullName: user?.data?.Full_Name || '',
                 email: user?.data?.email || '',
-                dob: user?.data?.dob || ''
+                dob: formatDate(user?.data?.dob),
             });
+            setErrors({ dob: '' }); // Clear errors
         }
         setIsEditing(!isEditing);
     };
 
+    // Format date for display (e.g., "January 1, 1990")
+    const displayDate = (dateString) => {
+        if (!dateString) return 'Not specified';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'Not specified';
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        } catch (error) {
+            return 'Not specified';
+        }
+    };
+
+    // Calculate max allowed date (5 years ago from today)
+    const maxDate = new Date();
+    maxDate.setFullYear(maxDate.getFullYear() - 5);
+    const maxDateString = maxDate.toISOString().split('T')[0];
+
     return (
-        <div className="min-h-screen bg-black text-white flex justify-center items-center px-4">
-            <div className="bg-gray-900 p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700">
-                <div className="flex justify-between items-center mb-6">
+        <div className="min-h-screen bg-black text-white flex justify-center items-center px-4 py-8 relative overflow-hidden">
+            {/* Background effects */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-purple-900/40 z-0"></div>
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
+            
+            {/* Grid pattern */}
+            <div className="absolute inset-0 opacity-10 z-0" 
+                style={{
+                    backgroundImage: "linear-gradient(to right, #4f46e5 1px, transparent 1px), linear-gradient(to bottom, #4f46e5 1px, transparent 1px)",
+                    backgroundSize: "30px 30px"
+                }}>
+            </div>
+            
+            {/* Main content container */}
+            <div className="relative z-10 bg-gray-900/80 backdrop-blur-sm p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-800">
+                {/* Success notification */}
+                {saveSuccess && (
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg text-sm animate-fadeIn">
+                        Profile updated successfully!
+                    </div>
+                )}
+                
+                {/* Header with back button and edit/save controls */}
+                <div className="flex justify-between items-center mb-8">
                     <button
                         onClick={() => navigate(-1)}
-                        className="text-sm text-gray-400 hover:text-white"
+                        className="flex items-center text-sm text-cyan-300 hover:text-white bg-gray-800/50 px-3 py-1.5 rounded-lg hover:bg-gray-800 transition-all group relative overflow-hidden"
                     >
-                        ← Back
+                        <span className="absolute top-0 left-0 w-full h-full bg-white/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
+                        <ArrowLeft className="w-4 h-4 mr-1 relative" /> <span className="relative">Back</span>
                     </button>
 
                     {isEditing ? (
                         <div className="flex space-x-2">
                             <button
                                 onClick={handleSave}
-                                disabled={isSaving}
-                                className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition"
+                                disabled={isSaving || errors.dob}
+                                className={`bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all flex items-center font-medium relative overflow-hidden group ${
+                                    isSaving || errors.dob ? 'opacity-70 cursor-not-allowed' : ''
+                                }`}
                             >
-                                {isSaving ? 'Saving...' : 'Save'}
+                                <span className="absolute top-0 left-0 w-full h-full bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
+                                {isSaving ? (
+                                    <span className="relative">Saving...</span>
+                                ) : (
+                                    <>
+                                        <Save className="w-4 h-4 mr-2 relative" />
+                                        <span className="relative">Save</span>
+                                    </>
+                                )}
                             </button>
                             <button
                                 onClick={toggleEditMode}
-                                className="bg-gray-700 text-white px-4 py-1 rounded hover:bg-gray-600 transition"
+                                className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center"
                             >
-                                Cancel
+                                <X className="w-4 h-4 mr-2" /> Cancel
                             </button>
                         </div>
                     ) : (
                         <button
                             onClick={toggleEditMode}
-                            className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
+                            className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm transition-all hover:shadow-lg hover:shadow-blue-500/50 relative overflow-hidden group flex items-center"
                         >
-                            Edit Profile
+                            <span className="absolute top-0 left-0 w-full h-full bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
+                            <Edit3 className="w-4 h-4 mr-2 relative" /> <span className="relative">Edit Profile</span>
                         </button>
                     )}
                 </div>
 
-                <div className="flex items-center space-x-4 mb-8">
-                    <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center text-2xl font-bold">
+                {/* Profile picture and name */}
+                <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-6 mb-8">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-3xl font-bold shadow-lg shadow-blue-500/20 ring-4 ring-gray-800">
                         {formData.username.charAt(0).toUpperCase() || 'U'}
                     </div>
-                    <div>
-                        <h2 className="text-2xl font-semibold">{formData.fullName || 'User'}</h2>
-                        <p className="text-gray-400 text-sm">{formData.username}</p>
+                    <div className="text-center md:text-left">
+                        <h2 className="text-3xl font-bold mb-2">
+                            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text">
+                                {formData.fullName || 'User'}
+                            </span>
+                        </h2>
+                        <p className="text-gray-400">@{formData.username || 'username'}</p>
                     </div>
                 </div>
 
+                {/* Profile form fields */}
                 <div className="space-y-6">
-                    {/* Full Name */}
-                    <div>
-                        <label className="block mb-1 text-sm">Full Name</label>
-                        <input
-                            type="text"
-                            name="fullName"
-                            className={`w-full p-2 rounded-md ${isEditing ? 'bg-gray-800' : 'bg-gray-800 opacity-75'}`}
-                            value={formData.fullName}
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                        />
-                    </div>
-
-                    {/* Username */}
-                    <div>
-                        <label className="block mb-1 text-sm">Username</label>
-                        <input
-                            type="text"
-                            name="username"
-                            className={`w-full p-2 rounded-md ${isEditing ? 'bg-gray-800' : 'bg-gray-800 opacity-75'}`}
-                            value={formData.username}
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                        />
-                    </div>
-
-                    {/* Email (non-editable) */}
-                    <div>
-                        <label className="block mb-1 text-sm">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            className="w-full bg-gray-800 opacity-75 p-2 rounded-md"
-                            value={formData.email}
-                            disabled
-                        />
-                        <p className="text-xs text-gray-400 mt-1">Email cannot be edited</p>
-                    </div>
-
-                    {/* Date of Birth */}
-                    <div>
-                        <label className="block mb-1 text-sm">Date of Birth</label>
-                        {isEditing ? (
-                            <input
-                                type="date"
-                                name="dob"
-                                className="w-full bg-gray-800 p-2 rounded-md"
-                                value={formData.dob}
-                                onChange={handleChange}
-                            />
-                        ) : (
-                            <div className="bg-gray-800 opacity-75 p-2 rounded-md">
-                                {formData.dob || 'Not set'}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Connect Discord */}
-                    <div className="flex items-center justify-between bg-gray-800 p-3 rounded-md">
-                        <div className="flex items-center space-x-2">
-                            <span className="text-xl">🎮</span>
-                            <span>Discord</span>
+                    <div className="space-y-4">
+                        {/* Username field */}
+                        <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700 transition-all hover:border-blue-500/30">
+                            <label className="block text-sm text-cyan-300 mb-1">Username</label>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    name="username"
+                                    value={formData.username}
+                                    onChange={handleChange}
+                                    className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            ) : (
+                                <div className="flex items-center">
+                                    <User className="text-blue-400 w-5 h-5 mr-2" />
+                                    <span className="text-white">{formData.username}</span>
+                                </div>
+                            )}
                         </div>
-                        <button className="text-blue-500 hover:underline">Connect</button>
-                    </div>
 
-                    {/* Influencer */}
-                    <div>
-                        <button className="w-full border border-white py-2 rounded-md hover:bg-white hover:text-black transition">
-                            Become an Influencer
-                        </button>
+                        {/* Full Name field */}
+                        <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700 transition-all hover:border-blue-500/30">
+                            <label className="block text-sm text-cyan-300 mb-1">Full Name</label>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    value={formData.fullName}
+                                    onChange={handleChange}
+                                    className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            ) : (
+                                <div className="flex items-center">
+                                    <User className="text-blue-400 w-5 h-5 mr-2" />
+                                    <span className="text-white">{formData.fullName}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Email field (readonly) */}
+                        <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                            <label className="block text-sm text-cyan-300 mb-1">Email</label>
+                            <div className="flex items-center">
+                                <Mail className="text-blue-400 w-5 h-5 mr-2" />
+                                <span className="text-white">{formData.email}</span>
+                            </div>
+                        </div>
+
+                        {/* Date of Birth field with validation */}
+                        <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700 transition-all hover:border-blue-500/30">
+                            <label className="block text-sm text-cyan-300 mb-1">Date of Birth</label>
+                            {isEditing ? (
+                                <>
+                                    <input
+                                        type="date"
+                                        name="dob"
+                                        value={formData.dob}
+                                        onChange={handleChange}
+                                        max={maxDateString}
+                                        className={`w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 ${
+                                            errors.dob ? 'focus:ring-red-500 border-red-500' : 'focus:ring-blue-500'
+                                        }`}
+                                    />
+                                    {errors.dob && (
+                                        <p className="text-red-400 text-xs mt-1">{errors.dob}</p>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="flex items-center">
+                                    <Calendar className="text-blue-400 w-5 h-5 mr-2" />
+                                    <span className="text-white">{displayDate(formData.dob)}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
