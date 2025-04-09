@@ -29,10 +29,10 @@ const PromptInput = ({ prompt, onChange, onGenerate, isLoading, maxChars }) => {
           withCredentials: true, // if cookies or credentials are required
         }
       );
-      console.log('Response:', response);
-      const data = await response;
-      if (data.enhancedPrompt) {
-        onChange({ target: { value: data.enhancedPrompt } });
+      // console.log('Response:', response);
+      const data = await response.data.data.prompt;
+      if (data) {
+        onChange({ target: { value: data } });
       }
     } catch (error) {
       console.error('Error enhancing prompt:', error);

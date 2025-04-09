@@ -32,10 +32,7 @@ class SignupController {
             next(error);
         }
     }
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
     async validateToken(req, res, next) {
         try {
             if (req.user) {
