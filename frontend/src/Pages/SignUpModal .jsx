@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { AuthContext } from '../context/AuthContext';
+import React, { useState, useContext } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
 
 const SignUpModal = () => {
   const navigate = useNavigate();
@@ -19,13 +19,13 @@ const SignUpModal = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -48,17 +48,30 @@ const SignUpModal = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Function to fetch user data with the token
+  const fetchUserData = async () => {
+    try {
+      const response = await axios.get("http://localhost:5005/api/user/me", {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setApiError(null); // Reset API error
-    
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
 
     try {
       // Register the user
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:5005/api/auth/signup",
         formData,
         {
@@ -70,17 +83,31 @@ const SignUpModal = () => {
 
       // Auto-login after successful registration
       const loginResponse = await axios.post(
-        "http://localhost:5005/api/auth/login", 
+        "http://localhost:5005/api/auth/login",
         { email: formData.email, password: formData.password },
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
       );
-      
-      login(loginResponse.data.token, loginResponse.data.user);
-      navigate('/workspace', { replace: true });
 
+      const token = loginResponse.data.token;
+      
+      if (!token) {
+        throw new Error("No token received from server");
+      }
+
+      // Fetch user data
+      const userData = await fetchUserData();
+
+      // Save login state
+      login(token, userData);
+      
+      // Redirect to workspace
+      navigate("/workspace", { replace: true });
     } catch (error) {
       console.error("Registration error:", error);
-      
+
       // Handle different types of errors
       if (error.response) {
         if (error.response.data.errors) {
@@ -255,7 +282,7 @@ const SignUpModal = () => {
           Try{" "}
           <a href="/ai" className="underline hover:text-black">
             invideo AI
-          </a>  
+          </a>
           , the new idea-to-video generator
         </div>
       </div>
