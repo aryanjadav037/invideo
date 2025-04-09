@@ -22,5 +22,6 @@ router.post('/logout', (req, res, next) => loginController.logout(req, res, next
 router.get('/google', (req, res, next) => googleController.gAuth(req, res, next));
 router.get('/google/callback', (req, res, next) => googleController.authenticateCallback(req, res, next));
 router.get('/verify/:token', (req, res, next) => signupController.verifyEmail(req, res, next));
+router.get('/validate', authMiddleware, (req, res, next) => signupController.validateToken(req, res, next));
 
 export default router;

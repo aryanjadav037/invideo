@@ -6,6 +6,7 @@ import errorHandler from './middlewares/errorHandler.js';
 import cors from "cors";
 import ImageRoutes from './routes/imageRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import collectionRoutes from './routes/collectionRoutes.js';
 import CookieParser from 'cookie-parser';
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use(
 app.use('/api/auth', authRoutes);
 app.use('/api/image', ImageRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/collection', collectionRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');
