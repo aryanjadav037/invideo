@@ -48,10 +48,54 @@ class AuthService {
 
     return this.tokenService.generateToken(user);
   }
+  
+  async register(Username, Full_Name, email, password, dob, role) {
+    const existingUser = await this.userModel.findOne({ email });
 
+    if (existingUser) {
+      throw new Error('User already exists');
+    }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationToken = crypto.randomBytes(32).toString('hex');
 
-    async logout(res) {
+    const newUser = await this.userModel.create({
+      Username,
+      Full_Name,
+      email,
+      password: hashedPassword,
+      dob,
+      role,
+      verificationToken,
+      isVerified: false
+    });
+
+    await sendVerificationEmail(email, verificationToken);
+
+    return { message: 'Verification email sent. Please verify to continue.' };
+  }
+
+  async verifyEmail(token) {
+
+    try {
+      const user = await this.userModel.findOne({ verificationToken: token });
+
+      if (!user) {
+        return'Invalid or expired token';
+      }
+
+      user.isVerified = true;
+      user.verificationToken = undefined;
+      await user.save();
+
+      return 'Email verified successfully';
+    } catch (error) {
+      console.error('Verification error:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  }
+  
+  async logout(res) {
         res.clearCookie("auth_token", {
             httpOnly: true,
             secure: false,

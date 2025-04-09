@@ -12,6 +12,7 @@ const SignUpModal = () => {
     Full_Name: "",
     email: "",
     password: "",
+    dob: "", // Added DOB field
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,22 +44,12 @@ const SignUpModal = () => {
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
+    if (!formData.dob) {
+      newErrors.dob = "Date of birth is required";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  // Function to fetch user data with the token
-  const fetchUserData = async () => {
-    try {
-      const response = await axios.get("http://localhost:5005/api/user/me", {
-        withCredentials: true,
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      throw error;
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -71,9 +62,12 @@ const SignUpModal = () => {
 
     try {
       // Register the user
-      await axios.post(
+      const response = await axios.post(
         "http://localhost:5005/api/auth/signup",
-        formData,
+        {
+          ...formData,
+          role: "user" // Default role
+        },
         {
           headers: {
             "Content-Type": "application/json",
@@ -81,30 +75,14 @@ const SignUpModal = () => {
         }
       );
 
-      // Auto-login after successful registration
-      const loginResponse = await axios.post(
-        "http://localhost:5005/api/auth/login",
-        { email: formData.email, password: formData.password },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      );
-
-      const token = loginResponse.data.token;
-      
-      if (!token) {
-        throw new Error("No token received from server");
+      // Check response and redirect to verification page
+      if (response.data && response.data.message) {
+        // Successful registration with verification email sent
+        navigate("/verify-email", { 
+          state: { email: formData.email },
+          replace: true 
+        });
       }
-
-      // Fetch user data
-      const userData = await fetchUserData();
-
-      // Save login state
-      login(token, userData);
-      
-      // Redirect to workspace
-      navigate("/workspace", { replace: true });
     } catch (error) {
       console.error("Registration error:", error);
 
@@ -231,7 +209,7 @@ const SignUpModal = () => {
           </div>
 
           {/* Password Field */}
-          <div className="mb-4">
+          <div className="mb-3">
             <input
               type="password"
               name="password"
@@ -245,6 +223,23 @@ const SignUpModal = () => {
             />
             {errors.password && (
               <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+            )}
+          </div>
+
+          {/* Date of Birth Field */}
+          <div className="mb-4">
+            <input
+              type="date"
+              name="dob"
+              value={formData.dob}
+              onChange={handleChange}
+              disabled={isSubmitting}
+              className={`w-full px-4 py-2 border rounded text-sm focus:outline-none focus:ring ${
+                errors.dob ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.dob && (
+              <p className="text-red-500 text-xs mt-1">{errors.dob}</p>
             )}
           </div>
 

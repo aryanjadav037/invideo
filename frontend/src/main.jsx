@@ -4,19 +4,16 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from './Layout/Layout.jsx'
-// import LoginModal from './Pages/LoginModal.jsx'
 import HeroSection from './Pages/HeroSection.jsx'
-// import SignUpModal from './Pages/SignUpModal.jsx'
-// import AuthProvider from './context/AuthContext.jsx'
-import ProtectedRoute from './components/ProtectedRoute.jsx'
-import SimpleLayout from './Layout/SimpleLayout.jsx'
 import SignUpModal from './Pages/SignUpModal .jsx'
 import LoginModal from './Pages/LoginModal.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
-// import Workspace from './Pages/Workspace.jsx'
+import ProtectedRoute from './components/ProtectedRoute.jsx'
+import SimpleLayout from './Layout/SimpleLayout.jsx'
 import ProfilePage from './Pages/Workspace/ProfilePage.jsx'
 import Workspace from './Pages/Workspace/WorkSpace.jsx'
 import ErrorPage from './Pages/ErrorPage.jsx'
+import EmailVerificationPage from './Pages/EmailVerificationPage.jsx' // Import the new component
 
 const router = createBrowserRouter([
   {
@@ -27,6 +24,7 @@ const router = createBrowserRouter([
       { path: "/", element: <HeroSection/> },
       { path: "/signup", element: <SignUpModal/> },
       { path: "/login", element: <LoginModal /> },
+      { path: "/verify-email", element: <EmailVerificationPage /> }, // Add new route
     ],
   },
   {
@@ -43,7 +41,7 @@ const router = createBrowserRouter([
         ) 
       },
       {
-        path: "/profile", // 👈 Add this route
+        path: "/profile",
         element: (
           <ProtectedRoute>
             <ProfilePage />
