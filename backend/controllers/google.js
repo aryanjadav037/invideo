@@ -17,7 +17,7 @@ class GoogleController {
         try {
             const { code } = req.query;
             const user = await this.googleService.authenticateCallback(code);
-            res.status(201).json({ success: true, user });
+            res.redirect("http://localhost:5173/login");
         } catch (error) {
             next(error);
         }

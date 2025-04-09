@@ -20,7 +20,7 @@ router.post('/signup', (req, res, next) => signupController.signup(req, res, nex
 router.post('/login', (req, res, next) => loginController.login(req, res, next));
 router.post('/logout', (req, res, next) => loginController.logout(req, res, next));
 router.get('/google', (req, res, next) => googleController.gAuth(req, res, next));
-router.get('/google/callback', (req, res, next) => googleController.authenticateCallback(req, res, next));
+router.get('/google/callback', (req, res, next) => googleController.callAUth(req, res, next));
 router.get('/verify/:token', (req, res, next) => signupController.verifyEmail(req, res, next));
 router.get('/validate', authMiddleware, (req, res, next) => signupController.validateToken(req, res, next));
 

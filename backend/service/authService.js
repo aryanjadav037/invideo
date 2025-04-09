@@ -49,7 +49,7 @@ class AuthService {
     return this.tokenService.generateToken(user);
   }
   
-  async register(Username, Full_Name, email, password, dob, role) {
+  async registerGoogle(Username, Full_Name, email, password, dob, role) {
     const existingUser = await this.userModel.findOne({ email });
 
     if (existingUser) {
@@ -69,8 +69,6 @@ class AuthService {
       verificationToken,
       isVerified: false
     });
-
-    await sendVerificationEmail(email, verificationToken);
 
     return { message: 'Verification email sent. Please verify to continue.' };
   }
