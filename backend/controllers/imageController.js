@@ -50,7 +50,27 @@ class ImageController {
         console.error("Error fetching images:", error.message);
         res.status(500).json({ success: false, message: "Failed to retrieve images" });
     }
-}
+  }
+
+  async deleteUserImage(req, res) {
+    try {
+        const {imageId} = req.params;
+
+        // Fetch images from DB
+        const response = await ImageService.deleteUserImage(imageId);
+
+        res.status(200).json({
+            success: true,
+            message: "image deleted successfully"
+        });
+    } catch (error) {
+        console.error("Error fetching images:", error.message);
+        res.status(500).json({ success: false, message: "Failed to retrieve images" });
+    }
+  }
+
+  
+
 }
 
 export default new ImageController();

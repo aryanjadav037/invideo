@@ -40,6 +40,7 @@ const generateImage = async (prompt) => {
   }
 };
 
+
 const saveImageToDatabase = async (userId, prompt, imageUrl) => {
   try {
     const image = new ImageModel({ user: userId, prompt, imageUrl });
@@ -70,8 +71,22 @@ const getUserImages = async (userId) => {
   }
 };
 
+const deleteUserImage = async (imageId) => {
+  try {
+      // Fetch all images by userId
+      const res = await ImageModel.findByIdAndDelete({ _id: imageId });
+
+      return res;
+  } catch (error) {
+      console.error("Error fetching user images:", error.message);
+      throw new Error("Failed to fetch images");
+  }
+};
+
 export default {
   generateImage,
   saveImageToDatabase,
   getUserImages,
+  deleteUserImage,
+  enhencePrompt
 };

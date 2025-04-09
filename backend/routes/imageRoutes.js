@@ -7,5 +7,6 @@ const ImageRoutes = express.Router();
 
 ImageRoutes.post('/generate', authMiddleware, ImageController.createImage);
 ImageRoutes.get('/history', authMiddleware, ImageController.fetchUserImages);
+ImageRoutes.delete('/delete/:imageId', authMiddleware, ImageController.deleteUserImage)
 
 export default ImageRoutes;
