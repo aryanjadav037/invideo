@@ -51,34 +51,13 @@ class AuthService {
 
 
 
-  async logout(res) {
-    res.clearCookie("auth_token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
-  }
-
-  async verifyEmail(token) {
-
-    try {
-      const user = await this.userModel.findOne({ verificationToken: token });
-
-      if (!user) {
-        return'Invalid or expired token';
-      }
-
-      user.isVerified = true;
-      user.verificationToken = undefined;
-      await user.save();
-
-      return 'Email verified successfully';
-    } catch (error) {
-      console.error('Verification error:', error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    async logout(res) {
+        res.clearCookie("auth_token", {
+            httpOnly: true,
+            secure: false,
+            sameSite: "Lax",
+        });
     }
-  }
-
 }
 
 export default AuthService;

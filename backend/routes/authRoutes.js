@@ -6,6 +6,7 @@ import AuthService from '../service/authService.js';
 import TokenService from '../service/tokenService.js';
 import GoogleService from '../service/googleService.js';
 import UserModel from '../models/userModel.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 const tokenService = new TokenService(process.env.SECRET_KEY, '1h');

@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios"; // Make sure to install axios: npm install axios
+import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
 
 const SignUpModal = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     Username: "",
     Full_Name: "",
@@ -46,18 +48,31 @@ const SignUpModal = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Function to fetch user data with the token
+  const fetchUserData = async () => {
+    try {
+      const response = await axios.get("http://localhost:5005/api/user/me", {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setApiError(null); // Reset API error
-    
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
 
     try {
-      // Replace this URL with your actual API endpoint
-      const response = await axios.post(
-        "https://b9f9-49-36-83-170.ngrok-free.app/api/auth/signup",
+      // Register the user
+      await axios.post(
+        "http://localhost:5005/api/auth/signup",
         formData,
         {
           headers: {
@@ -66,29 +81,35 @@ const SignUpModal = () => {
         }
       );
 
-      // Handle successful registration
-      console.log("Registration successful:", response.data);
+      // Auto-login after successful registration
+      const loginResponse = await axios.post(
+        "http://localhost:5005/api/auth/login",
+        { email: formData.email, password: formData.password },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+
+      const token = loginResponse.data.token;
       
-      // Option 1: Redirect to login with success message
-      navigate("/login", {
-        state: {
-          from: location.state?.from || "/",
-          registered: true, // To show success message on login page
-        },
-        replace: true,
-      });
+      if (!token) {
+        throw new Error("No token received from server");
+      }
 
-      // Option 2: If your API returns a token and you want to login immediately
-      // localStorage.setItem("authToken", response.data.token);
-      // navigate(location.state?.from || "/dashboard", { replace: true });
+      // Fetch user data
+      const userData = await fetchUserData();
 
+      // Save login state
+      login(token, userData);
+      
+      // Redirect to workspace
+      navigate("/workspace", { replace: true });
     } catch (error) {
       console.error("Registration error:", error);
-      
+
       // Handle different types of errors
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         if (error.response.data.errors) {
           // Handle validation errors from server
           setErrors(error.response.data.errors);
@@ -99,10 +120,8 @@ const SignUpModal = () => {
           );
         }
       } else if (error.request) {
-        // The request was made but no response was received
         setApiError("Network error. Please check your connection.");
       } else {
-        // Something happened in setting up the request that triggered an Error
         setApiError("An unexpected error occurred. Please try again.");
       }
     } finally {
@@ -112,7 +131,7 @@ const SignUpModal = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-md mx-auto rounded-lg shadow-lg p-6 relative ">
+      <div className="w-full max-w-md mx-auto rounded-lg shadow-lg p-6 relative bg-white">
         {/* Close Button */}
         <button
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"
@@ -123,14 +142,14 @@ const SignUpModal = () => {
         </button>
 
         {/* Title */}
-        <h2 className="text-2xl font-bold text-center">
+        <h2 className="text-2xl font-bold text-center mb-4">
           Create your <span className="text-blue-500">Free</span> Account
         </h2>
 
         {/* Google Signup */}
         <button
           type="button"
-          className="flex items-center justify-center w-full mt-6 py-2 border rounded text-sm font-medium hover:bg-black hover:bg-opacity-10"
+          className="flex items-center justify-center w-full py-2 border rounded text-sm font-medium hover:bg-gray-100 mb-3"
           disabled={isSubmitting}
         >
           <img
@@ -238,10 +257,10 @@ const SignUpModal = () => {
             }`}
           >
             {isSubmitting ? (
-              <>
+              <div className="flex items-center justify-center">
                 <span className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
                 Processing...
-              </>
+              </div>
             ) : (
               "Continue"
             )}
@@ -259,11 +278,11 @@ const SignUpModal = () => {
             Login
           </Link>
         </div>
-        <div className="text-center mt-2 text-xs ">
+        <div className="text-center mt-2 text-xs">
           Try{" "}
-          <a href="/ai" className="text-gray-600 underline hover:text-black">
+          <a href="/ai" className="underline hover:text-black">
             invideo AI
-          </a>  
+          </a>
           , the new idea-to-video generator
         </div>
       </div>

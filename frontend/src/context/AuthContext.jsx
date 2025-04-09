@@ -1,60 +1,117 @@
-import { createContext, useState, useEffect } from "react";
+import axios from 'axios';
+import { createContext, useState, useEffect, useCallback } from 'react';
 
 export const AuthContext = createContext();
 
-const AuthProvider = ({ children }) => {
-  const [authState, setAuthState] = useState({
-    isAuthenticated: false,
-    user: null,
-    token: null,
-  });
+export const AuthProvider = ({ children }) => {
+    const [authState, setAuthState] = useState({
+        isAuthenticated: false,
+        user: null,
+        isLoading: true  // Added loading state
+    });
 
-  useEffect(() => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const userData = localStorage.getItem("userData");
-      if (token && userData) {
-        const user = JSON.parse(userData);
-        if (user && token) {
-          setAuthState({
-            isAuthenticated: true,
-            user,
-            token,
-          });
+    // Validate token with backend
+    const validateToken = useCallback(async () => {
+        try {
+            const response = await axios.get('http://localhost:5005/api/auth/validate', {
+              withCredentials: true
+            });
+            return response.data.isValid;
+        } catch (error) {
+            console.error('Token validation failed:', error);
+            return false;
         }
-      }
-    } catch (error) {
-      console.error("Failed to parse user data:", error);
-      // Clear corrupted data
-      localStorage.removeItem("userData");
-    }
-  }, []);
+    }, []);
 
-  const login = (token, userData) => {
-    localStorage.setItem("authToken", token);
-    localStorage.setItem("userData", JSON.stringify(userData));
-    setAuthState({
-      isAuthenticated: true,
-      user: userData,
-      token,
-    });
-  };
+    // Initialize auth state - runs on app load
+    const initializeAuth = useCallback(async () => {
+        const userData = localStorage.getItem('userData');
+        
+        if (userData) {
+            try {
+                const isValid = await validateToken();
+                
+                if (isValid) {
+                    setAuthState({
+                        isAuthenticated: true,
+                        user: JSON.parse(userData),
+                        isLoading: false
+                    });
+                    return;
+                }
+            } catch (error) {
+                console.error('Auth initialization error:', error);
+            }
+            
+            // Clear invalid data
+            localStorage.removeItem('userData');
+        }
+        
+        setAuthState({
+            isAuthenticated: false,
+            user: null,
+            isLoading: false
+        });
+    }, [validateToken]);
 
-  const logout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userData");
-    setAuthState({
-      isAuthenticated: false,
-      user: null,
-      token: null,
-    });
-  };
+    useEffect(() => {
+        initializeAuth();
+    }, [initializeAuth]);
 
-  return (
-    <AuthContext.Provider value={{ ...authState, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+    const login = useCallback((token, userData) => {
+        localStorage.setItem('userData', JSON.stringify(userData));
+        
+        setAuthState({
+            isAuthenticated: true,
+            user: userData,
+            isLoading: false
+        });
+        
+        return true;
+    }, []);
+
+    const logout = useCallback(async () => {
+        try {
+            await axios.post('http://localhost:5005/api/auth/logout', {}, {
+                withCredentials: true
+            });
+        } catch (error) {
+            console.error('Logout failed:', error);
+        } finally {
+            localStorage.removeItem('userData');
+            setAuthState({
+                isAuthenticated: false,
+                user: null,
+                isLoading: false
+            });
+        }
+    }, []);
+
+    const updateUser = useCallback((updatedData) => {
+        const updatedUser = {
+            ...authState.user,
+            data: {
+                ...authState.user?.data,
+                ...updatedData
+            }
+        };
+        
+        localStorage.setItem('userData', JSON.stringify(updatedUser));
+        setAuthState(prev => ({
+            ...prev,
+            user: updatedUser
+        }));
+    }, [authState.user]);
+
+    return (
+        <AuthContext.Provider value={{ 
+            ...authState, 
+            login, 
+            logout,
+            updateUser,
+            initializeAuth // Expose for manual revalidation
+        }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
-
-export default AuthProvider;

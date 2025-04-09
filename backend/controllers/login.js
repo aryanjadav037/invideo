@@ -9,14 +9,16 @@ class LoginController {
             const token = await this.authService.authenticate(email, password);
 
             res.cookie("auth_token", token, {
-                httpOnly: true, 
-                secure: process.env.NODE_ENV === "production", 
-                maxAge: 3600000, // 1 hour
+                httpOnly: true,     // ✅ For security, protects from XSS
+                secure: false,      // ✅ Use true only with HTTPS
+                maxAge: 3600000,    // 1 hour
+                sameSite: 'Lax',    // or 'None' with secure: true for cross-origin
             });
+            
 
             res.status(200).json({ success: true, token });
         } catch (error) {
-            next(error); 
+           console.log(error) 
         }
     }
 
@@ -25,6 +27,7 @@ class LoginController {
             await this.authService.logout(res);
             res.status(200).json({ success: true, message: 'Logged out successfully' });
         } catch (error) {
+            console.error("Logout error:", error);
             next(error);
         }
     }

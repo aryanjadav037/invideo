@@ -4,7 +4,6 @@ const tokenService = new TokenService(process.env.SECRET_KEY, '1h');
 
 const authMiddleware = (req, res, next) => {
     const token = req.cookies?.auth_token; // Get token from cookies
-
     if (!token) {
         return res.status(401).json({ success: false, message: "Access denied. No token provided." });
     }

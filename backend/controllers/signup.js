@@ -30,6 +30,16 @@ class SignupController {
             next(error);
         }
     }
+    async validateToken(req, res, next) {
+        try {
+            if (req.user) {
+                return res.status(200).json({isValid : true})
+            }
+            return res.status(200).json({isValid : false})
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default SignupController;
