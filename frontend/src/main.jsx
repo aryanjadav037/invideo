@@ -13,14 +13,14 @@ import ProtectedRoute from './components/ProtectedRoute.jsx'
 import SimpleLayout from './Layout/SimpleLayout.jsx'
 import ProfilePage from './Pages/Workspace/ProfilePage.jsx'
 import Workspace from './Pages/Workspace/Workspace.jsx'
-import ErrorPage from './Pages/ErrorPage.jsx'
+import UnderConstructionPage from './Pages/UnderConstructionPage.jsx'
 import EmailVerificationPage from './Pages/EmailVerificationPage.jsx'
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/",  
     element: <Layout/>, // Uses Navbar+Footer
-    errorElement: <ErrorPage />,
+    errorElement: <UnderConstructionPage />,
     children: [
       { path: "/", element: <HeroSection/> },
       // Removed signup and login from here
