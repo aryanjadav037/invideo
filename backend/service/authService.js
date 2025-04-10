@@ -53,7 +53,7 @@ class AuthService {
     const existingUser = await this.userModel.findOne({ email });
 
     if (existingUser) {
-      throw new Error('User already exists');
+      return { message: 'Log in with Google , Success' };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
