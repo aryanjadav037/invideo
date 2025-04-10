@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
 export const sendVerificationEmail = async (email, token) => {
-  const verificationUrl = `${process.env.CLIENT_URL}/api/auth/verify/${token}`;
+  const verificationUrl = `${process.env.BACKEND_URL}/api/auth/verify/${token}`;
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -35,7 +35,7 @@ export const sendVerificationEmail = async (email, token) => {
   // console.log('Sending verification email to:', email);
 
   const mailOptions = {
-    from: `"AImagicx" <${process.env.MAIL_USER}>`,
+    from: `"InVideo" <${process.env.MAIL_USER}>`,
     to: email,
     subject: 'Verify Your Email',
     html: htmlContent,
