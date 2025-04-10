@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { AppWindowIcon } from "lucide-react";
+const api = import.meta.env.VITE_SERVER_API;
 
 const LoginModal = () => {
   const navigate = useNavigate();
@@ -37,7 +39,7 @@ const LoginModal = () => {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get("http://localhost:5005/api/user/me", {
+      const response = await axios.get(`${api}/api/user/me`, {
         withCredentials: true,
       });
       return response.data;
@@ -54,7 +56,7 @@ const LoginModal = () => {
     setIsLoading(true);
     try {
       const loginResponse = await axios.post(
-        "http://localhost:5005/api/auth/login",
+        `${api}/api/auth/login`,
         formData,
         {
           withCredentials: true,

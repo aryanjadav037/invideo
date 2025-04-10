@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { createContext, useState, useEffect, useCallback } from 'react';
 
+const api = import.meta.env.VITE_SERVER_API;
 export const AuthContext = createContext();
-
 export const AuthProvider = ({ children }) => {
     const [authState, setAuthState] = useState({
         isAuthenticated: false,
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     // Validate token with backend
     const validateToken = useCallback(async () => {
         try {
-            const response = await axios.get('http://localhost:5005/api/auth/validate', {
+            const response = await axios.get(`${api}/api/auth/validate`, {
               withCredentials: true
             });
             return response.data.isValid;
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = useCallback(async () => {
         try {
-            await axios.post('http://localhost:5005/api/auth/logout', {}, {
+            await axios.post(`${api}/api/auth/logout`, {}, {
                 withCredentials: true
             });
         } catch (error) {

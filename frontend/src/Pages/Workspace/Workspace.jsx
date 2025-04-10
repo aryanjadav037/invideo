@@ -5,10 +5,11 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import ProfileDropdown from "./ProfileDropdown";
 import OutputDisplay from "./OutputDisplay";
-import QuickActions from "./QuickActions";
+// import QuickActions from "./QuickActions";
 import History from "./History";
 import PromptInput from "./PromptInput";
 import { FaImage, FaFilm, FaLightbulb, FaScroll } from "react-icons/fa";
+const api = import.meta.env.VITE_SERVER_API;
 
 const Workspace = () => {
   const { user, logout } = useContext(AuthContext);
@@ -23,8 +24,8 @@ const Workspace = () => {
   const outputRef = useRef(null);
   const maxChars = 32000;
 
-  const API_ENDPOINT = "http://localhost:5005/api/image/generate";
-  const HISTORY_API = "http://localhost:5005/api/image/history";
+  const API_ENDPOINT = `${api}/api/image/generate`;
+  const HISTORY_API = `${api}/api/image/history`;
   const FALLBACK_IMAGE =
     "https://res.cloudinary.com/dcu9peqwj/image/upload/v1744020286/uploads/f7mhyra5jqojqcavpi8c.jpg";
 
