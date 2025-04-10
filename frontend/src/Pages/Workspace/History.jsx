@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Clock, ImageIcon, MessageSquare, Download, Share, Copy, Check, Maximize2, X, Trash2 } from "lucide-react"
 import axios from "axios"
+const api = import.meta.env.VITE_SERVER_API;
 
 export default function History({ history, FALLBACK_IMAGE, updateHistory }) {
   const [expandedItem, setExpandedItem] = useState(null)
@@ -35,7 +36,7 @@ export default function History({ history, FALLBACK_IMAGE, updateHistory }) {
     
     try {
       const response = await axios.delete(
-        `http://localhost:5005/api/image/delete/${item.id}`,
+        `${api}/api/image/delete/${item.id}`,
         { withCredentials: true }
       )
       

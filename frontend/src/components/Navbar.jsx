@@ -93,7 +93,7 @@ const Navbar = () => {
         
         {/* Logo */}
         <div className="flex-shrink-0 mr-10">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text">My App</h1>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text">In Video</h1>
         </div>
 
         {/* Desktop Menu */}

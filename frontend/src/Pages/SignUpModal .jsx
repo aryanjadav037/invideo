@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+const api = import.meta.env.VITE_SERVER_API;
 
 const SignUpModal = () => {
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ const SignUpModal = () => {
     try {
       // Register the user
       const response = await axios.post(
-        "http://localhost:5005/api/auth/signup",
+        `${api}/api/auth/signup`,
         {
           ...formData,
           role: "user" // Default role
