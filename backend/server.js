@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(CookieParser()); 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://invideo-eta.vercel.app/",
     credentials: true,
   })
 );
