@@ -53,7 +53,7 @@ class AuthService {
     const existingUser = await this.userModel.findOne({ email });
 
     if (existingUser) {
-      throw new Error('User already exists');
+      return { message: 'Log in with Google , Success' };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -94,11 +94,19 @@ class AuthService {
   }
   
   async logout(res) {
+        //local
+        // res.clearCookie("auth_token", {
+        //     httpOnly: true,
+        //     secure: false,
+        //     sameSite: "Lax",
+        // });
+
+        //deployment
         res.clearCookie("auth_token", {
-            httpOnly: true,
-            secure: false,
-            sameSite: "Lax",
-        });
+          httpOnly: true,
+          secure: true,
+          sameSite: "None",
+      });
     }
 }
 

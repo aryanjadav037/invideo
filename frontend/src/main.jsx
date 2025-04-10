@@ -12,7 +12,7 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import SimpleLayout from './Layout/SimpleLayout.jsx'
 import ProfilePage from './Pages/Workspace/ProfilePage.jsx'
-import Workspace from './Pages/Workspace/WorkSpace.jsx'
+import Workspace from './Pages/Workspace/Workspace.jsx'
 import ErrorPage from './Pages/ErrorPage.jsx'
 import EmailVerificationPage from './Pages/EmailVerificationPage.jsx'
 

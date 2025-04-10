@@ -8,6 +8,7 @@ import ImageRoutes from './routes/imageRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import collectionRoutes from './routes/collectionRoutes.js';
 import CookieParser from 'cookie-parser';
+import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 const app = express();
@@ -16,11 +17,20 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
+// Rate Limiter: Apply to all requests
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minutes
+  max: 20,                 // limit each IP to 10 requests per windowMs
+  message: "Too many requests, please try again later.",
+});
+app.use(limiter);
+
+
 app.use(express.json()); 
 app.use(CookieParser()); 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ['https://invideo-eta.vercel.app/', "http://localhost:5173"],
     credentials: true,
   })
 );
