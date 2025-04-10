@@ -25,8 +25,8 @@ const dropdowns = {
       },
       {
         links: [
-          { to: "/ai-login", text: "AI Login", className: "text-cyan-400 font-bold" },
-          { to: "/ai-signup", text: "AI Sign Up", className: "text-purple-500 font-bold" },
+          { to: "/login", text: "AI Login", className: "text-cyan-400 font-bold" },
+          { to: "/signup", text: "AI Sign Up", className: "text-purple-500 font-bold" },
         ],
       },
     ],
