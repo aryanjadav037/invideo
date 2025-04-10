@@ -8,13 +8,21 @@ class LoginController {
             const { email, password } = req.body;
             const token = await this.authService.authenticate(email, password);
 
+            //Local
+            // res.cookie("auth_token", token, {
+            //     httpOnly: true,     // ✅ For security, protects from XSS
+            //     secure: false,      // ✅ Use true only with HTTPS
+            //     maxAge: 3600000,    // 1 hour
+            //     sameSite: 'Lax',    // or 'None' with secure: true for cross-origin
+            // });
+
+            //deployment
             res.cookie("auth_token", token, {
                 httpOnly: true,     // ✅ For security, protects from XSS
-                secure: false,      // ✅ Use true only with HTTPS
+                secure: true,      // ✅ Use true only with HTTPS
                 maxAge: 3600000,    // 1 hour
-                sameSite: 'Lax',    // or 'None' with secure: true for cross-origin
+                sameSite: 'None',    // or 'None' with secure: true for cross-origin
             });
-            
 
             res.status(200).json({ success: true, token });
         } catch (error) {

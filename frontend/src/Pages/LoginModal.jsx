@@ -39,11 +39,12 @@ const LoginModal = () => {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get(`${api}/api/user/me`, {
+      var response = await axios.get(`${api}/api/user/me`, {
         withCredentials: true,
       });
       return response.data;
     } catch (error) {
+      console.log("User data fetched====>", response.data);
       console.error("Error fetching user data:", error);
       throw error;
     }
