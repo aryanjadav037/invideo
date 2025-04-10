@@ -12,40 +12,46 @@ import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 const app = express();
-
 const PORT = process.env.PORT || 5000;
 
+// ✅ Connect DB
 connectDB();
 
-// Rate Limiter: Apply to all requests
+// ✅ Rate Limiting
 const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minutes
-  max: 20,                 // limit each IP to 10 requests per windowMs
-  message: "Too many requests, please try again later.",
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests
+  message: "Too many requests from this IP, please try again later.",
 });
 app.use(limiter);
 
+// ✅ Middleware
+app.use(express.json());
+app.use(CookieParser());
 
-app.use(express.json()); 
-app.use(CookieParser()); 
+// ✅ CORS
 app.use(
   cors({
-    origin: ['https://invideo-eta.vercel.app/', "http://localhost:5173"],
+    origin: ["https://invideo-eta.vercel.app", "http://localhost:5173"],
     credentials: true,
-
   })
 );
-app.options('', cors());
+
+// ✅ Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/image', ImageRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/collection', collectionRoutes);
 
+// ✅ Test Route
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
+// ✅ Error Handler
 app.use(errorHandler);
+
+// ✅ Start Server
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`🚀 Server is running on port ${PORT}`);
 });
