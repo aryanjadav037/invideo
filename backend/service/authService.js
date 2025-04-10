@@ -94,11 +94,19 @@ class AuthService {
   }
   
   async logout(res) {
+        //local
+        // res.clearCookie("auth_token", {
+        //     httpOnly: true,
+        //     secure: false,
+        //     sameSite: "Lax",
+        // });
+
+        //deployment
         res.clearCookie("auth_token", {
-            httpOnly: true,
-            secure: false,
-            sameSite: "Lax",
-        });
+          httpOnly: true,
+          secure: true,
+          sameSite: "None",
+      });
     }
 }
 
