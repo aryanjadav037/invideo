@@ -32,9 +32,10 @@ app.use(
   cors({
     origin: ['https://invideo-eta.vercel.app/', "http://localhost:5173"],
     credentials: true,
+
   })
 );
-
+app.options('', cors());
 app.use('/api/auth', authRoutes);
 app.use('/api/image', ImageRoutes);
 app.use('/api/user', userRoutes);
