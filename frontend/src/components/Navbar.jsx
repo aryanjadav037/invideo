@@ -25,8 +25,8 @@ const dropdowns = {
       },
       {
         links: [
-          { to: "/login", text: "AI Login", className: "text-cyan-400 font-bold" },
-          { to: "/signup", text: "AI Sign Up", className: "text-purple-500 font-bold" },
+          { to: "/ai-login", text: "AI Login", className: "text-cyan-400 font-bold" },
+          { to: "/ai-signup", text: "AI Sign Up", className: "text-purple-500 font-bold" },
         ],
       },
     ],
@@ -43,6 +43,28 @@ const dropdowns = {
           { to: "/templates", text: "Templates" },
           { to: "/collaboration", text: "Team Collaboration" },
           { to: "/storage", text: "Cloud Storage" },
+        ],
+      },
+    ],
+  },
+  developers: {
+    title: "Developers",
+    titleColor: "text-green-400",
+    items: [
+      {
+        title: "Our Team",
+        links: [
+          { to: "https://github.com/manangajera", text: "Manan Gajera", externalLink: true },
+          { to: "https://github.com/aryanjadav037", text: "Aryan Jadav", externalLink: true },
+          { to: "https://github.com/Ayush-desaii", text: "Ayush Desai", externalLink: true },
+        ],
+      },
+      {
+        title: "Resources",
+        links: [
+          { to: "/api-docs", text: "API Documentation" },
+          { to: "/developer-guide", text: "Developer Guide" },
+          { to: "/github", text: "GitHub Repository" },
         ],
       },
     ],
@@ -93,33 +115,9 @@ const Navbar = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [isMobileOpen]);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (openDropdown && !event.target.closest('.dropdown-container')) {
-        setOpenDropdown(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [openDropdown]);
-
   const toggleDropdown = (menu) => {
     setOpenDropdown(openDropdown === menu ? null : menu);
   };
-
-  // Prevent scrolling when mobile menu is open
-  useEffect(() => {
-    if (isMobileOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [isMobileOpen]);
 
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
@@ -138,13 +136,11 @@ const Navbar = () => {
             {Object.entries(dropdowns).map(([key, { title, titleColor, items }]) => (
               <li
                 key={key}
-                className="relative group dropdown-container"
+                className="relative group"
+                onMouseEnter={() => setOpenDropdown(key)}
+                onMouseLeave={() => setOpenDropdown(null)}
               >
-                <button 
-                  className={`flex items-center ${titleColor} hover:text-white transition-colors duration-300`}
-                  onClick={() => toggleDropdown(key)}
-                  onMouseEnter={() => setOpenDropdown(key)}
-                >
+                <button className={`flex items-center ${titleColor} hover:text-white transition-colors duration-300`}>
                   {title}
                   <svg
                     className={`w-4 h-4 ml-1 transition-transform duration-300 ${openDropdown === key ? 'rotate-180' : ''}`}
@@ -159,10 +155,7 @@ const Navbar = () => {
 
                 {/* Dropdown */}
                 {openDropdown === key && (
-                  <div 
-                    className="absolute left-0 mt-2 w-64 bg-gray-900/90 backdrop-blur-md rounded-md shadow-lg py-1 z-50 border border-gray-800 shadow-blue-900/20"
-                    onMouseLeave={() => setOpenDropdown(null)}
-                  >
+                  <div className="absolute left-0 mt-2 w-64 bg-gray-900/90 backdrop-blur-md rounded-md shadow-lg py-1 z-50 border border-gray-800 shadow-blue-900/20">
                     {items.map((item, index) => (
                       <div key={index}>
                         {item.title && (
@@ -171,15 +164,26 @@ const Navbar = () => {
                           </div>
                         )}
                         <div className={item.grid ? "grid grid-cols-2 gap-1 p-2" : "px-4 py-2"}>
-                          {item.links.map(({ to, text, className }, linkIndex) => (
-                            <Link
-                              key={linkIndex}
-                              to={to}
-                              className={`text-xs px-4 py-2 hover:bg-blue-900/30 block rounded transition-colors duration-200 ${className || 'text-gray-300'}`}
-                              onClick={() => setOpenDropdown(null)}
-                            >
-                              {text}
-                            </Link>
+                          {item.links.map(({ to, text, className, externalLink }, linkIndex) => (
+                            externalLink ? (
+                              <a
+                                key={linkIndex}
+                                href={to}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`text-xs px-4 py-2 hover:bg-blue-900/30 block rounded transition-colors duration-200 ${className || 'text-gray-300'}`}
+                              >
+                                {text}
+                              </a>
+                            ) : (
+                              <Link
+                                key={linkIndex}
+                                to={to}
+                                className={`text-xs px-4 py-2 hover:bg-blue-900/30 block rounded transition-colors duration-200 ${className || 'text-gray-300'}`}
+                              >
+                                {text}
+                              </Link>
+                            )
                           ))}
                         </div>
                       </div>
@@ -208,7 +212,6 @@ const Navbar = () => {
         <button 
           className="md:hidden text-white focus:outline-none"
           onClick={() => setIsMobileOpen(!isMobileOpen)}
-          aria-label="Toggle menu"
         >
           {isMobileOpen ? (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -222,45 +225,51 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Menu - Full screen overlay */}
+      {/* Mobile Menu - Keeping the original structure */}
       {isMobileOpen && (
-        <div className="md:hidden fixed inset-0 bg-black/95 z-40 pt-16 overflow-y-auto" onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            setIsMobileOpen(false);
-          }
-        }}>
-          <div className="container mx-auto px-5 py-4">
-            <ul className="flex flex-col space-y-2">
-              {Object.entries(dropdowns).map(([key, { title, titleColor, items }]) => (
-                <li key={key} className="w-full border-b border-gray-800/50 pb-2">
-                  <button
-                    className={`flex items-center justify-between w-full py-2 ${titleColor || 'text-white'}`}
-                    onClick={() => toggleDropdown(key)}
+        <div className="md:hidden bg-gray-900/95 backdrop-blur-md shadow-lg border-t border-gray-800 max-h-[80vh] overflow-y-auto">
+          <ul className="flex flex-col pb-4 px-5 space-y-2">
+            {Object.entries(dropdowns).map(([key, { title, titleColor, items }]) => (
+              <li key={key} className="w-full">
+                <button
+                  className={`flex items-center justify-between w-full py-2 ${titleColor || 'text-white'}`}
+                  onClick={() => toggleDropdown(key)}
+                >
+                  <span>{title}</span>
+                  <svg
+                    className={`w-4 h-4 ml-1 transition-transform duration-300 ${openDropdown === key ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <span>{title}</span>
-                    <svg
-                      className={`w-4 h-4 ml-1 transition-transform duration-300 ${openDropdown === key ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  
-                  {/* Submenu with animation */}
-                  {openDropdown === key && (
-                    <div className="ml-4 mt-2 space-y-2 border-l border-blue-800/50 pl-4 animate-fadeIn">
-                      {items.map((item, index) => (
-                        <div key={index} className="space-y-2">
-                          {item.title && (
-                            <div className="font-medium text-cyan-400 text-xs pt-2">
-                              {item.title}
-                            </div>
-                          )}
-                          <div className={item.grid ? "grid grid-cols-2 gap-x-2 gap-y-3" : "space-y-3"}>
-                            {item.links.map(({ to, text, className }, linkIndex) => (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Submenu */}
+                {openDropdown === key && (
+                  <div className="ml-4 mt-2 space-y-2 border-l border-blue-800/50 pl-2">
+                    {items.map((item, index) => (
+                      <div key={index} className="space-y-1">
+                        {item.title && (
+                          <div className="font-medium text-cyan-400 text-xs pt-2">
+                            {item.title}
+                          </div>
+                        )}
+                        <div className={item.grid ? "grid grid-cols-2 gap-x-2 gap-y-1" : "space-y-1"}>
+                          {item.links.map(({ to, text, className, externalLink }, linkIndex) => (
+                            externalLink ? (
+                              <a
+                                key={linkIndex}
+                                href={to}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`block py-1 text-sm ${className || 'text-gray-300'} hover:text-white`}
+                              >
+                                {text}
+                              </a>
+                            ) : (
                               <Link
                                 key={linkIndex}
                                 to={to}
@@ -269,42 +278,54 @@ const Navbar = () => {
                               >
                                 {text}
                               </Link>
-                            ))}
-                          </div>
+                            )
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </li>
-              ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </li>
+            ))}
 
-              {/* Non-dropdown links */}
-              <li className="border-b border-gray-800/50 pb-2">
-                <Link to="/community" className="block py-2 text-gray-300 hover:text-white" onClick={() => setIsMobileOpen(false)}>Community</Link>
-              </li>
-              <li className="border-b border-gray-800/50 pb-2">
-                <Link to="/pricing" className="block py-2 text-gray-300 hover:text-white" onClick={() => setIsMobileOpen(false)}>Pricing</Link>
-              </li>
-
-              {/* Mobile Auth Buttons */}
-              <li className="pt-4 flex flex-col space-y-3">
-                <Link 
-                  to="/login" 
-                  className="block py-2 text-center text-gray-300 border border-gray-700 rounded-lg hover:border-gray-500 transition-colors"
-                  onClick={() => setIsMobileOpen(false)}
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="block py-2 text-center text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:shadow-lg hover:shadow-blue-500/20 transition-all"
-                  onClick={() => setIsMobileOpen(false)}
-                >
-                  Sign Up
-                </Link>
-              </li>
-            </ul>
-          </div>
+            {/* Non-dropdown links */}
+            <li>
+              <Link 
+                to="/community" 
+                className="block py-2 text-gray-300 hover:text-white"
+                onClick={() => setIsMobileOpen(false)}
+              >
+                Community
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/pricing" 
+                className="block py-2 text-gray-300 hover:text-white"
+                onClick={() => setIsMobileOpen(false)}
+              >
+                Pricing
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/login" 
+                className="block py-2 text-gray-300 hover:text-white"
+                onClick={() => setIsMobileOpen(false)}
+              >
+                Login
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/signup"
+                className="block w-full py-2 text-center text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg mt-4"
+                onClick={() => setIsMobileOpen(false)}
+              >
+                Sign Up
+              </Link>
+            </li>
+          </ul>
         </div>
       )}
     </nav>
