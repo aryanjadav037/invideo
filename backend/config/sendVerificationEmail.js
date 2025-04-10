@@ -35,7 +35,7 @@ export const sendVerificationEmail = async (email, token) => {
   // console.log('Sending verification email to:', email);
 
   const mailOptions = {
-    from: `"AImagicx" <${process.env.MAIL_USER}>`,
+    from: `"InVideo" <${process.env.MAIL_USER}>`,
     to: email,
     subject: 'Verify Your Email',
     html: htmlContent,

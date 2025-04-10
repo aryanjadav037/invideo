@@ -27,7 +27,7 @@ class SignupController {
         try {
             const { token } = req.params;
             await this.authService.verifyEmail(token);
-            res.redirect("https://invideo-eta.vercel.app/login");
+            res.redirect("https://invideo-eta.vercel.app");
         } catch (error) {
             next(error);
         }
