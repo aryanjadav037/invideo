@@ -1,4 +1,3 @@
-
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '../config/sendVerificationEmail.js';
@@ -16,7 +15,7 @@ class AuthService {
       throw new Error('User already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await this.hashPassword(password);
     const verificationToken = crypto.randomBytes(32).toString('hex');
 
     const newUser = await this.userModel.create({
@@ -48,24 +47,36 @@ class AuthService {
 
     return this.tokenService.generateToken(user);
   }
+  
+  async registerGoogle(Username, Full_Name, email, password, dob, role) {
+    const existingUser = await this.userModel.findOne({ email });
 
+    if (existingUser) {
+      return existingUser; // Return the actual user object instead of just a message
+    }
 
+    const hashedPassword = await this.hashPassword(password);
 
-  async logout(res) {
-    res.clearCookie("auth_token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+    const newUser = await this.userModel.create({
+      Username,
+      Full_Name,
+      email,
+      password: hashedPassword,
+      dob,
+      role,
+      verificationToken: null,
+      isVerified: true
     });
+
+    return newUser; // Return the user object for token generation
   }
 
   async verifyEmail(token) {
-
     try {
       const user = await this.userModel.findOne({ verificationToken: token });
 
       if (!user) {
-        return'Invalid or expired token';
+        return 'Invalid or expired token';
       }
 
       user.isVerified = true;
@@ -75,10 +86,30 @@ class AuthService {
       return 'Email verified successfully';
     } catch (error) {
       console.error('Verification error:', error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
+      throw new Error('Internal Server Error');
     }
   }
+  
+  async logout(res) {
+    //local
+    res.clearCookie("auth_token", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "Lax",
+    });
 
+    //deployment
+    // res.clearCookie("auth_token", {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "None",
+    // });
+  }
+
+  // Add this helper method for password hashing
+  async hashPassword(password) {
+    return await bcrypt.hash(password, 10);
+  }
 }
 
 export default AuthService;
