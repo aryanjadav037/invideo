@@ -137,10 +137,12 @@ const Navbar = () => {
               <li
                 key={key}
                 className="relative group"
-                onMouseEnter={() => setOpenDropdown(key)}
-                onMouseLeave={() => setOpenDropdown(null)}
               >
-                <button className={`flex items-center ${titleColor} hover:text-white transition-colors duration-300`}>
+                <button 
+                  className={`flex items-center ${titleColor} hover:text-white transition-colors duration-300 group`}
+                  onClick={() => toggleDropdown(key)}
+                  onMouseEnter={() => setOpenDropdown(key)}
+                >
                   {title}
                   <svg
                     className={`w-4 h-4 ml-1 transition-transform duration-300 ${openDropdown === key ? 'rotate-180' : ''}`}
@@ -153,9 +155,13 @@ const Navbar = () => {
                   </svg>
                 </button>
 
-                {/* Dropdown */}
+                {/* Dropdown with improved hover behavior */}
                 {openDropdown === key && (
-                  <div className="absolute left-0 mt-2 w-64 bg-gray-900/90 backdrop-blur-md rounded-md shadow-lg py-1 z-50 border border-gray-800 shadow-blue-900/20">
+                  <div 
+                    className="absolute left-0 mt-2 w-64 bg-gray-900/90 backdrop-blur-md rounded-md shadow-lg py-1 z-50 border border-gray-800 shadow-blue-900/20"
+                    onMouseEnter={() => setOpenDropdown(key)}
+                    onMouseLeave={() => setOpenDropdown(null)}
+                  >
                     {items.map((item, index) => (
                       <div key={index}>
                         {item.title && (
