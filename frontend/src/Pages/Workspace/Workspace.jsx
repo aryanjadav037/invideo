@@ -27,7 +27,7 @@ const Workspace = () => {
   const API_ENDPOINT = `${api}/api/image/generate`;
   const HISTORY_API = `${api}/api/image/history`;
   const FALLBACK_IMAGE =
-    "https://res.cloudinary.com/dcu9peqwj/image/upload/v1744020286/uploads/f7mhyra5jqojqcavpi8c.jpg";
+    "https://cdn.dribbble.com/userupload/21148888/file/original-6bad51f87ee3532bc3cfaeef7921c674.png?resize=752x&vertical=center";
 
   // Check authentication on mount and redirect if not authenticated
   useEffect(() => {
